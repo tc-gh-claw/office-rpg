@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>蝦仔辦公室 - Dragon Quest風</title>
+    <title>蝦仔辦公室 - Dragon Quest V 風格</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+TC:wght@400;700&display=swap');
         
         * {
             margin: 0;
@@ -18,7 +18,7 @@
         
         body {
             font-family: 'Noto Sans TC', sans-serif;
-            background: #1a1a2e;
+            background: #0d1b2a;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -30,49 +30,68 @@
             position: relative;
             width: 800px;
             height: 600px;
-            background: #2d2d44;
-            border: 4px solid #4a4a6a;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            background: #1b263b;
+            border: 8px solid #415a77;
+            box-shadow: 
+                0 0 0 4px #778da9,
+                0 0 20px rgba(0,0,0,0.8),
+                inset 0 0 100px rgba(0,0,0,0.3);
         }
         
         #game-canvas {
             display: block;
-            background: #3d3d5c;
+            background: #2d3a4a;
         }
         
-        /* 對話框 - Dragon Quest風格 */
+        /* Dragon Quest 風格對話框 */
         #dialogue-box {
             position: absolute;
             bottom: 20px;
             left: 20px;
             right: 20px;
-            background: linear-gradient(180deg, #1a1a2e 0%, #0d0d1a 100%);
-            border: 4px solid #fff;
-            border-radius: 8px;
+            background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 4px solid #212529;
+            border-radius: 0;
             padding: 20px;
             display: none;
             box-shadow: 
-                inset 0 0 0 2px #4a4a6a,
-                0 4px 0 #000;
+                inset 0 0 0 2px #6c757d,
+                inset 0 0 0 4px #adb5bd,
+                4px 4px 0 #212529;
         }
         
         #dialogue-box.active {
             display: block;
+            animation: slideUp 0.2s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
         
         #dialogue-box .speaker {
-            color: #ffd700;
+            color: #212529;
             font-weight: bold;
             font-size: 14px;
-            margin-bottom: 8px;
-            text-shadow: 2px 2px 0 #000;
+            margin-bottom: 10px;
+            padding: 4px 12px;
+            background: #ffd43b;
+            border: 2px solid #212529;
+            display: inline-block;
+            box-shadow: 2px 2px 0 #212529;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 10px;
         }
         
         #dialogue-box .message {
-            color: #fff;
+            color: #212529;
             font-size: 16px;
-            line-height: 1.6;
-            text-shadow: 1px 1px 0 #000;
+            line-height: 1.8;
+            min-height: 60px;
+            padding: 10px;
+            background: rgba(255,255,255,0.5);
+            border: 2px dashed #adb5bd;
         }
         
         #dialogue-box .input-area {
@@ -83,87 +102,94 @@
         
         #dialogue-input {
             flex: 1;
-            background: #2d2d44;
-            border: 2px solid #4a4a6a;
-            border-radius: 4px;
-            padding: 10px;
-            color: #fff;
+            background: #fff;
+            border: 3px solid #212529;
+            padding: 12px;
+            color: #212529;
             font-size: 14px;
             font-family: inherit;
+            box-shadow: inset 2px 2px 0 #adb5bd;
         }
         
         #dialogue-input:focus {
             outline: none;
-            border-color: #ffd700;
+            border-color: #339af0;
         }
         
         #send-btn {
-            background: linear-gradient(180deg, #4a90d9 0%, #2a5a9a 100%);
-            border: 2px solid #fff;
-            border-radius: 4px;
-            padding: 10px 20px;
+            background: linear-gradient(180deg, #51cf66 0%, #37b24d 100%);
+            border: 3px solid #212529;
+            padding: 12px 24px;
             color: #fff;
             font-weight: bold;
             cursor: pointer;
-            text-shadow: 1px 1px 0 #000;
-            box-shadow: 0 4px 0 #1a3a6a;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 10px;
+            text-shadow: 1px 1px 0 #212529;
+            box-shadow: 3px 3px 0 #212529;
+            transition: all 0.1s;
         }
         
         #send-btn:hover {
-            background: linear-gradient(180deg, #5aa0e9 0%, #3a6aaa 100%);
+            background: linear-gradient(180deg, #69db7c 0%, #51cf66 100%);
         }
         
         #send-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 2px 0 #1a3a6a;
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0 #212529;
         }
         
-        /* 提示文字 */
+        /* 提示文字 - DQ 風格 */
         #hint {
             position: absolute;
             top: 10px;
             left: 10px;
             color: #fff;
-            font-size: 12px;
-            text-shadow: 1px 1px 0 #000;
-            background: rgba(0,0,0,0.5);
-            padding: 8px 12px;
-            border-radius: 4px;
+            font-size: 11px;
+            font-family: 'Press Start 2P', cursive;
+            text-shadow: 2px 2px 0 #212529;
+            background: rgba(0,0,0,0.7);
+            padding: 10px 15px;
+            border: 2px solid #fff;
+            box-shadow: 3px 3px 0 #212529;
         }
         
         #hint kbd {
-            background: #4a4a6a;
+            background: #ffd43b;
+            color: #212529;
             padding: 2px 6px;
-            border-radius: 3px;
-            font-family: monospace;
+            border: 2px solid #212529;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 8px;
         }
         
-        /* 互動提示 */
+        /* 互動提示 - DQ 風格箭咀 */
         #interaction-hint {
             position: absolute;
             display: none;
-            background: #ffd700;
-            color: #000;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-            animation: bounce 0.5s infinite alternate;
+            background: #ff6b6b;
+            color: #fff;
+            padding: 6px 12px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 8px;
+            border: 3px solid #212529;
+            box-shadow: 2px 2px 0 #212529;
+            animation: bounce 0.6s infinite alternate;
         }
         
         @keyframes bounce {
             from { transform: translateY(0); }
-            to { transform: translateY(-5px); }
+            to { transform: translateY(-8px); }
         }
         
-        /* 載入畫面 */
+        /* 載入畫面 - DQ 風格 */
         #loading {
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: #1a1a2e;
+            background: linear-gradient(180deg, #0d1b2a 0%, #1b263b 100%);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -173,35 +199,70 @@
         }
         
         #loading h1 {
-            font-size: 32px;
-            color: #ffd700;
-            text-shadow: 3px 3px 0 #000;
+            font-size: 24px;
+            color: #ffd43b;
+            font-family: 'Press Start 2P', cursive;
+            text-shadow: 
+                3px 3px 0 #212529,
+                -1px -1px 0 #212529,
+                1px -1px 0 #212529,
+                -1px 1px 0 #212529;
+            margin-bottom: 30px;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        #loading .dragon {
+            font-size: 48px;
             margin-bottom: 20px;
+            animation: float 2s infinite ease-in-out;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
         
         #loading p {
-            font-size: 14px;
-            opacity: 0.7;
+            font-size: 10px;
+            font-family: 'Press Start 2P', cursive;
+            color: #adb5bd;
         }
         
         /* 回應區域 */
         #response-area {
-            max-height: 100px;
+            max-height: 80px;
             overflow-y: auto;
             margin-top: 10px;
-            padding: 10px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 4px;
-            font-size: 14px;
-            color: #aaa;
+            padding: 8px;
+            background: rgba(0,0,0,0.05);
+            border: 2px solid #adb5bd;
+            font-size: 12px;
         }
         
         #response-area .user-msg {
-            color: #4a90d9;
+            color: #339af0;
+            margin-bottom: 4px;
         }
         
         #response-area .claw-msg {
-            color: #90d94a;
+            color: #51cf66;
+            margin-bottom: 4px;
+        }
+        
+        /* 打字機效果游標 */
+        .typing-cursor::after {
+            content: '▋';
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
         }
     </style>
 </head>
@@ -210,24 +271,25 @@
         <canvas id="game-canvas" width="800" height="600"></canvas>
         
         <div id="hint">
-            <kbd>WASD</kbd> 或 <kbd>方向鍵</kbd> 移動 | 靠近蝦仔按 <kbd>SPACE</kbd> 或 <kbd>ENTER</kbd> 對話
+            <kbd>WASD</kbd> 移動 | <kbd>SPACE</kbd> 對話
         </div>
         
-        <div id="interaction-hint">按 SPACE 對話</div>
+        <div id="interaction-hint">▼ 按 SPACE</div>
         
         <div id="dialogue-box">
-            <div class="speaker">❤️‍🔥 蝦仔 (熱血宅男智慧 Buddy)</div>
-            <div class="message" id="dialogue-text">嘿！有咩可以幫到你？有問必答！</div>
+            <div class="speaker">❤️‍🔥 蝦仔</div>
+            <div class="message" id="dialogue-text"></div>
             <div id="response-area"></div>
             <div class="input-area">
-                <input type="text" id="dialogue-input" placeholder="輸入指令或問題..." autocomplete="off">
+                <input type="text" id="dialogue-input" placeholder="輸入指令..." autocomplete="off">
                 <button id="send-btn">傳送</button>
             </div>
         </div>
         
         <div id="loading">
-            <h1>🏢 蝦仔辦公室</h1>
-            <p>載入中...</p>
+            <div class="dragon">🐉</div>
+            <h1>蝦仔辦公室</h1>
+            <p>NOW LOADING...</p>
         </div>
     </div>
     
