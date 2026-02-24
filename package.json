@@ -2,20 +2,15 @@
   "name": "office-rpg-game",
   "version": "1.0.0",
   "description": "蝦仔辦公室 - Dragon Quest 風格 RPG",
-  "main": "server.js",
+  "main": "api/index.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js",
-    "build": "echo 'No build step required for static site'",
-    "test": "echo 'No tests yet'"
+    "start": "node api/index.js",
+    "dev": "node api/index.js"
   },
-  "keywords": [
-    "rpg",
-    "pixel-art",
-    "dragon-quest",
-    "office",
-    "game"
-  ],
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "keywords": ["rpg", "pixel-art", "dragon-quest", "office", "game"],
   "author": "蝦仔",
   "license": "MIT",
   "engines": {
