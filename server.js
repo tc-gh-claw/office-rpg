@@ -9,9 +9,6 @@ const path = require('path');
 const { spawn } = require('child_process');
 
 const PORT = process.env.PORT || 3000;
-
-// Vercel serverless 兼容
-module.exports = server;
 const OPENCLAW_URL = process.env.OPENCLAW_URL || 'http://localhost:8080';
 const SESSION_KEY = process.env.SESSION_KEY || 'office-rpg-session';
 
@@ -196,17 +193,17 @@ const server = http.createServer(async (req, res) => {
     serveFile(res, filePath);
 });
 
+// 導出俾 Vercel（必須係最後）
+module.exports = server;
+
 // 啟動伺服器（本地開發時）
-if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
     server.listen(PORT, () => {
         log('INFO', `🎮 蝦仔辦公室後端啟動於 http://localhost:${PORT}`);
         log('INFO', `📁 靜態檔案目錄: ${__dirname}`);
         log('INFO', `🔌 OpenClaw session: ${SESSION_KEY}`);
     });
 }
-
-// 導出俾 Vercel
-module.exports = server;
 
 // 優雅關閉
 process.on('SIGTERM', () => {

@@ -18,6 +18,7 @@
     }
   ],
   "env": {
-    "SESSION_KEY": "office-rpg-session"
+    "SESSION_KEY": "office-rpg-session",
+    "NODE_ENV": "production"
   }
 }
