@@ -8,9 +8,17 @@
     "dev": "node api/index.js"
   },
   "dependencies": {
-    "express": "^4.18.2"
+    "cors": "^2.8.6",
+    "express": "^4.22.1",
+    "ws": "^8.14.2"
   },
-  "keywords": ["rpg", "pixel-art", "dragon-quest", "office", "game"],
+  "keywords": [
+    "rpg",
+    "pixel-art",
+    "dragon-quest",
+    "office",
+    "game"
+  ],
   "author": "蝦仔",
   "license": "MIT",
   "engines": {

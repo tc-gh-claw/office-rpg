@@ -1,0 +1,13 @@
+{
+  "name": "office-rpg-local-server",
+  "version": "1.0.0",
+  "description": "蝦仔辦公室本地後端",
+  "main": "local-server.js",
+  "scripts": {
+    "start": "node local-server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  }
+}

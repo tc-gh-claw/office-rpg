@@ -1,20 +1,24 @@
 /**
- * 蝦仔辦公室後端 API - Express 版本
+ * 蝦仔辦公室後端 API - WebSocket 版本
  * 連接 OpenClaw 同前端遊戲
  */
 
 const express = require('express');
+const http = require('http');
+const WebSocket = require('ws');
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
 
 const app = express();
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
+
 const PORT = process.env.PORT || 3000;
 const SESSION_KEY = process.env.SESSION_KEY || 'office-rpg-session';
 
 // 中間件
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '../public')));
 
 // CORS
 app.use((req, res, next) => {
@@ -94,7 +98,48 @@ function getMockResponse(text) {
     return `收到！你講咗：「${text}」。我會記住，然後幫你處理！`;
 }
 
-// API 路由
+// WebSocket 連接處理
+wss.on('connection', (ws) => {
+    log('INFO', '新 WebSocket 連接');
+    
+    ws.on('message', async (data) => {
+        try {
+            const msg = JSON.parse(data);
+            
+            if (msg.type === 'chat') {
+                const message = msg.content;
+                log('INFO', `WebSocket 收到訊息: ${message}`);
+                
+                let response;
+                try {
+                    response = await callOpenClaw(message);
+                    log('INFO', 'OpenClaw 回應成功');
+                } catch (err) {
+                    log('WARN', `OpenClaw 呼叫失敗: ${err.message}，使用模擬回應`);
+                    response = getMockResponse(message);
+                }
+                
+                ws.send(JSON.stringify({
+                    type: 'response',
+                    content: response,
+                    timestamp: new Date().toISOString()
+                }));
+            }
+        } catch (err) {
+            log('ERROR', `WebSocket 處理失敗: ${err.message}`);
+            ws.send(JSON.stringify({
+                type: 'error',
+                content: '處理訊息時出錯'
+            }));
+        }
+    });
+    
+    ws.on('close', () => {
+        log('INFO', 'WebSocket 連接關閉');
+    });
+});
+
+// HTTP API 路由（備用）
 app.post('/api/chat', async (req, res) => {
     try {
         const { message } = req.body;
@@ -103,7 +148,7 @@ app.post('/api/chat', async (req, res) => {
             return res.status(400).json({ error: 'Message is required' });
         }
         
-        log('INFO', `收到訊息: ${message}`);
+        log('INFO', `HTTP API 收到訊息: ${message}`);
         
         let response;
         try {
@@ -130,21 +175,24 @@ app.post('/api/chat', async (req, res) => {
 app.get('/api/health', (req, res) => {
     res.json({ 
         status: 'ok',
+        websocket: wss.clients.size,
         timestamp: new Date().toISOString()
     });
 });
 
-// 靜態檔案 - 主頁
-app.get('/', (req, res) => {
-    const indexPath = path.join(__dirname, '../index.html');
+// 靜態檔案 - 主頁（注入 API_URL）
+app.get("/", (req, res) => {
+    const indexPath = path.join(__dirname, "../index.html");
     if (fs.existsSync(indexPath)) {
-        res.sendFile(indexPath);
+        let html = fs.readFileSync(indexPath, "utf8");
+        const apiUrl = process.env.API_URL || "";
+        const scriptInjection = `<script>window.API_URL = "${apiUrl}";</script>`;
+        html = html.replace('<script src="game.js"></script>', scriptInjection + "\n    <script src=\"game.js\"></script>");
+        res.send(html);
     } else {
-        res.status(404).send('index.html not found');
+        res.status(404).send("index.html not found");
     }
 });
-
-// 其他靜態檔案
 app.get('/game.js', (req, res) => {
     const jsPath = path.join(__dirname, '../game.js');
     if (fs.existsSync(jsPath)) {
@@ -157,10 +205,11 @@ app.get('/game.js', (req, res) => {
 
 // 本地開發
 if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
         log('INFO', `🎮 蝦仔辦公室後端啟動於 http://localhost:${PORT}`);
+        log('INFO', `🔌 WebSocket 已啟用`);
     });
 }
 
 // Vercel 需要導出
-module.exports = app;
+module.exports = server;

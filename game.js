@@ -79,6 +79,9 @@ const keys = {
 let dialogueHistory = [];
 let isNearClaw = false;
 
+// API 設定 - 從環境變數或預設值
+const API_URL = window.API_URL || '';
+
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
     // 隱藏載入畫面
@@ -438,8 +441,11 @@ async function sendMessage() {
     document.getElementById('dialogue-text').textContent = '等等，我諗緊...';
     
     try {
-        // 發送到 OpenClaw 後端
-        const response = await fetch('/api/chat', {
+        // 決定 API 網址
+        const apiUrl = API_URL ? `${API_URL}/api/chat` : '/api/chat';
+        
+        // 發送到後端
+        const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
