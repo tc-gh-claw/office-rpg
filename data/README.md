@@ -2,7 +2,7 @@
 
 呢份係 **公開安全** 嘅員工快照：名單、狀態、預算、用量、事件。**唔好**把 API key、token、內部 webhook 寫入呢個檔。
 
-網站會用相對路徑載入：
+Matrix 終端指揮中心會用相對路徑載入：
 
 ```
 data/office-data.json
@@ -35,7 +35,7 @@ python3 -m http.server 4173
 | `employees[]` | 員工：`id`、`display_name`、`model`、`status`、`desk` |
 | `budgets.per_employee` | 每日／每月 token 上限 |
 | `usage` | 今日／本月／累計用量 |
-| `events[]` | 工作／測試紀錄（側欄動態同對話檢查器用） |
-| `rooms[]` | 地圖尺寸提示 |
+| `events[]` | 工作／測試紀錄（EVENT LOG 同 INSPECTOR 用） |
+| `rooms[]` | 可選；而家終端 UI 唔用地圖，保留俾匯出格式相容 |
 
 `status` 可用：`idle`（閒置）、`busy`（忙碌）、`paused`（暫停）、`offline`（離線）、`error`（錯誤）。

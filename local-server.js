@@ -1,5 +1,5 @@
 /**
- * 蝦仔辦公室後端 - 本地 Server + ngrok 版本
+ * WORKFORCE NODE 可選本地後端 + ngrok
  * 你部機開 server，Vercel 網站透過 ngrok 連返嚟
  */
 
@@ -99,7 +99,7 @@ app.get('/api/health', (req, res) => {
 
 // 啟動 server
 app.listen(PORT, () => {
-    log('INFO', `🎮 蝦仔辦公室本地後端啟動於 http://localhost:${PORT}`);
+    log('INFO', `WORKFORCE NODE 本地後端啟動於 http://localhost:${PORT}`);
     log('INFO', `📋 下一步：運行 ngrok http ${PORT} 取得公開網址`);
     log('INFO', `🔗 然後將 ngrok 網址填入 Vercel 環境變數 API_URL`);
 });

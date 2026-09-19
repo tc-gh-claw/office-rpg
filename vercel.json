@@ -11,7 +11,7 @@
       "use": "@vercel/static"
     },
     {
-      "src": "game.js",
+      "src": "app.js",
       "use": "@vercel/static"
     },
     {
@@ -37,8 +37,8 @@
       "dest": "/style.css"
     },
     {
-      "src": "/game.js",
-      "dest": "/game.js"
+      "src": "/app.js",
+      "dest": "/app.js"
     },
     {
       "src": "/",

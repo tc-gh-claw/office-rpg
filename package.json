@@ -1,7 +1,7 @@
 {
   "name": "office-rpg-game",
   "version": "1.0.0",
-  "description": "AI總管 · 員工辦公室（GitHub Pages 靜態視覺化）",
+  "description": "AI總管 :: WORKFORCE NODE — Matrix 終端指揮中心（GitHub Pages 靜態視覺化）",
   "main": "api/index.js",
   "scripts": {
     "start": "node api/index.js",
@@ -14,11 +14,11 @@
     "ws": "^8.14.2"
   },
   "keywords": [
-    "rpg",
-    "pixel-art",
-    "dragon-quest",
-    "office",
-    "game"
+    "matrix",
+    "terminal",
+    "command-center",
+    "workforce",
+    "static"
   ],
   "author": "蝦仔",
   "license": "MIT",
