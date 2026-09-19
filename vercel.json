@@ -47,13 +47,6 @@
     {
       "src": "/index.html",
       "dest": "/index.html"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/api/index.js"
     }
-  ],
-  "env": {
-    "SESSION_KEY": "office-rpg-session"
-  }
+  ]
 }

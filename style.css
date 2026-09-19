@@ -228,7 +228,7 @@ button, input, kbd, code, pre {
     flex: 1;
     display: grid;
     grid-template-columns: 1.05fr 0.95fr;
-    grid-template-rows: minmax(280px, 1fr) minmax(220px, 0.9fr);
+    grid-template-rows: minmax(220px, 1fr) minmax(180px, 0.85fr) auto;
     gap: 10px;
     padding: 10px;
     min-height: 0;
@@ -485,22 +485,28 @@ button, input, kbd, code, pre {
 .prompt-row .ps1 {
     padding: 8px 8px 8px 10px;
     color: var(--matrix-primary);
+    white-space: nowrap;
 }
 
-#command-input {
+.prompt-row input[type="text"] {
     flex: 1;
     background: transparent;
     border: 0;
     color: var(--matrix-bright);
     padding: 8px 8px 8px 0;
     font-size: 14px;
+    min-width: 0;
 }
 
-#command-input:focus {
+.prompt-row input[type="text"]:focus {
     outline: none;
 }
 
-#send-btn {
+.prompt-row input[type="text"]::placeholder {
+    color: var(--matrix-dim);
+}
+
+.prompt-row button {
     background: var(--matrix-primary);
     color: var(--matrix-bg);
     border: 0;
@@ -509,9 +515,46 @@ button, input, kbd, code, pre {
     letter-spacing: 1px;
 }
 
-#send-btn:hover {
+.prompt-row button:hover {
     background: var(--matrix-bright);
 }
+
+.prompt-row button:disabled {
+    opacity: 0.45;
+    cursor: wait;
+}
+
+#cmd-panel {
+    grid-column: 1 / -1;
+}
+
+.cmd-form {
+    padding: 8px 12px 12px;
+}
+
+.cmd-form .prompt-row {
+    margin-top: 0;
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.cmd-ack {
+    margin-top: 8px;
+    min-height: 1.4em;
+    font-size: 12px;
+    color: var(--matrix-muted);
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.cmd-ack.empty { color: var(--matrix-dim); }
+.cmd-ack.user { color: var(--matrix-bright); }
+.cmd-ack.ack { color: var(--matrix-primary); }
+.cmd-ack.err { color: var(--error); }
+
+.event-row.live.user { color: var(--matrix-bright); }
+.event-row.live.ack .who { color: var(--matrix-primary); }
+.event-row.live.err,
+.event-row.live.err .who { color: var(--error); }
 
 /* ---------- budgets / log ---------- */
 

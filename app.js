@@ -8,7 +8,8 @@
     'use strict';
 
     var DATA_FILE = 'data/office-data.json';
-    var API_URL = window.API_URL || '';
+    var PAGES_API_BASE = 'https://office-rpg.vercel.app';
+    var MAX_COMMAND_CHARS = 4000;
 
     var STATUS_UI = {
         idle: { label: '閒置', code: 'IDLE' },
@@ -39,6 +40,20 @@
     var selectedId = null;
     var loadError = null;
     var rainTimer = null;
+    var liveLog = [];
+    var cmdBusy = false;
+
+    function resolveApiBase() {
+        var override = window.API_BASE || window.API_URL;
+        if (typeof override === 'string' && override.trim()) {
+            return override.trim().replace(/\/$/, '');
+        }
+        var host = window.location.hostname || '';
+        if (/\.github\.io$/i.test(host)) {
+            return PAGES_API_BASE;
+        }
+        return '';
+    }
 
     function dataUrl() {
         var q = new URLSearchParams(window.location.search).get('data');
@@ -366,18 +381,39 @@
         }).join('');
     }
 
+    function liveLine(row) {
+        if (row.kind === 'user') return '> USER :: ' + row.text;
+        if (row.kind === 'ack') return '< AI總管 :: ' + row.text;
+        return '< SYS :: ' + row.text;
+    }
+
+    function liveWho(kind) {
+        if (kind === 'user') return 'USER';
+        if (kind === 'ack') return 'AI總管';
+        return 'SYS';
+    }
+
     function renderLog() {
         var feedEl = document.getElementById('event-feed');
+        var liveHtml = liveLog.slice().reverse().map(function (row) {
+            return (
+                '<div class="event-row live ' + escapeHtml(row.kind) + '">' +
+                    '<span class="when">' + escapeHtml(formatTime(row.ts)) + '</span>' +
+                    '<span class="who">' + escapeHtml(liveWho(row.kind)) + '</span>' +
+                    '<span>' + escapeHtml(liveLine(row)) + '</span>' +
+                '</div>'
+            );
+        }).join('');
         if (!officeData) {
-            feedEl.innerHTML = '';
+            feedEl.innerHTML = liveHtml || '';
             return;
         }
         var events = (officeData.events || []).slice().reverse();
-        if (!events.length) {
+        if (!events.length && !liveLog.length) {
             feedEl.innerHTML = '<div class="empty">&gt; 暫時未有事件。</div>';
             return;
         }
-        feedEl.innerHTML = events.map(function (ev, idx) {
+        feedEl.innerHTML = liveHtml + events.map(function (ev, idx) {
             var who = displayNameById(ev.employee_id);
             var cls = (ev.ok ? 'ok' : 'fail') + (ev.employee_id === selectedId ? ' active' : '');
             var preview = ev.text ? String(ev.text) : (ev.ok ? '成功' : '失敗');
@@ -396,7 +432,7 @@
             );
         }).join('');
 
-        feedEl.querySelectorAll('.event-row').forEach(function (row) {
+        feedEl.querySelectorAll('.event-row:not(.live)').forEach(function (row) {
             row.addEventListener('click', function () {
                 var id = row.getAttribute('data-id');
                 if (id) selectNode(id);
@@ -517,7 +553,7 @@
             linkEl.textContent = 'LINK/DOWN';
             renderRoster();
             document.getElementById('budget-list').innerHTML = '';
-            document.getElementById('event-feed').innerHTML = '';
+            renderLog();
             document.getElementById('inspector-body').innerHTML =
                 '<div class="data-error">載入唔到公開快照。</div>';
             return;
@@ -558,6 +594,92 @@
         return nodes.findIndex(function (n) { return n.id === selectedId; });
     }
 
+    /* ---------- 主管指令 console ---------- */
+
+    function setCmdAck(kind, text) {
+        var el = document.getElementById('cmd-ack');
+        if (!el) return;
+        el.className = 'cmd-ack ' + (kind || 'empty');
+        el.textContent = text;
+    }
+
+    function appendLive(kind, text) {
+        liveLog.push({
+            kind: kind,
+            text: text,
+            ts: new Date().toISOString()
+        });
+        renderLog();
+        var feed = document.getElementById('event-feed');
+        if (feed) feed.scrollTop = 0;
+    }
+
+    async function sendManagerCommand() {
+        var input = document.getElementById('manager-command-input');
+        var btn = document.getElementById('manager-send-btn');
+        if (!input || cmdBusy) return;
+        var command = input.value.trim();
+        if (!command) {
+            setCmdAck('err', '< SYS :: 指令係空嘅。');
+            return;
+        }
+        if (command.length > MAX_COMMAND_CHARS) {
+            setCmdAck('err', '< SYS :: 指令超過 ' + MAX_COMMAND_CHARS + ' 字。');
+            return;
+        }
+
+        input.value = '';
+        cmdBusy = true;
+        if (btn) btn.disabled = true;
+        appendLive('user', command);
+        setCmdAck('user', '> USER :: ' + command);
+
+        try {
+            var url = resolveApiBase() + '/api/manager-command';
+            var response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    command: command,
+                    source: 'office-rpg',
+                    ts: new Date().toISOString()
+                })
+            });
+            var data = {};
+            try {
+                data = await response.json();
+            } catch (parseErr) {
+                data = {};
+            }
+            if (!response.ok) {
+                var errText = (data && (data.reply || data.error)) || ('HTTP ' + response.status);
+                appendLive('err', errText);
+                setCmdAck('err', '< SYS :: ' + errText);
+                return;
+            }
+            var reply = (data && data.reply) ? data.reply : '已接收';
+            appendLive('ack', reply);
+            setCmdAck('ack', '< AI總管 :: ' + reply);
+        } catch (err) {
+            var fail = '無法連線 API。GitHub Pages 會打去 Vercel；本機請用 npm start。呢個 ACK 唔代表工作已執行。';
+            appendLive('err', fail);
+            setCmdAck('err', '< SYS :: ' + fail);
+        } finally {
+            cmdBusy = false;
+            if (btn) btn.disabled = false;
+            input.focus();
+        }
+    }
+
+    function bindCommandConsole() {
+        var form = document.getElementById('cmd-form');
+        if (!form) return;
+        form.addEventListener('submit', function (ev) {
+            ev.preventDefault();
+            sendManagerCommand();
+        });
+    }
+
     /* ---------- optional mock chat ---------- */
 
     function typeWriter(element, text, speed) {
@@ -585,23 +707,7 @@
         input.value = '';
         var host = document.querySelector('.last-reply') || document.getElementById('inspector-body');
         host.textContent = '…';
-        var who = selectedId;
-        try {
-            var apiUrl = API_URL ? API_URL + '/api/chat' : '/api/chat';
-            var response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: message, employee_id: who })
-            });
-            if (response.ok) {
-                var data = await response.json();
-                typeWriter(host, data.response);
-                return;
-            }
-        } catch (err) {
-            /* fall through */
-        }
-        typeWriter(host, getMockResponse(message, who));
+        typeWriter(host, getMockResponse(message, selectedId));
     }
 
     function getMockResponse(text, empId) {
@@ -696,6 +802,7 @@
         tickClock();
         window.setInterval(tickClock, 1000);
         document.addEventListener('keydown', onKey);
+        bindCommandConsole();
         loadOfficeData();
     }
 
