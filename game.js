@@ -731,16 +731,6 @@ function drawCharacter(ch, facing) {
         ctx.font = '9px monospace';
         ctx.fillText('…', x + w + 5, y + 12);
     }
-    if (ch.status === 'paused') {
-        ctx.fillStyle = '#f8f9fa';
-        ctx.fillRect(x + w + 2, y - 14, 22, 16);
-        ctx.strokeStyle = '#212529';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(x + w + 2, y - 14, 22, 16);
-        ctx.fillStyle = '#495057';
-        ctx.font = 'bold 11px "Noto Sans HK", sans-serif';
-        ctx.fillText('Zz', x + w + 6, y - 2);
-    }
     if (ch.status === 'error' && ch.animFrame) {
         ctx.fillStyle = '#ff6b6b';
         ctx.fillRect(x + 8, y - 12, 8, 8);
@@ -779,6 +769,18 @@ function drawNpc(npc) {
     drawCharacter(npc, 'down');
     const st = statusInfo(npc.status);
     drawLabel(npc.displayName, npc.x + npc.width / 2, npc.y - 20, st.color);
+    if (npc.status === 'paused') {
+        const zx = npc.x + npc.width + 4;
+        const zy = npc.y - 36;
+        ctx.fillStyle = '#f8f9fa';
+        ctx.fillRect(zx, zy, 24, 16);
+        ctx.strokeStyle = '#212529';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(zx, zy, 24, 16);
+        ctx.fillStyle = '#495057';
+        ctx.font = 'bold 11px "Noto Sans HK", sans-serif';
+        ctx.fillText('Zz', zx + 5, zy + 12);
+    }
     if (selectedId === npc.id) {
         ctx.strokeStyle = '#ffd43b';
         ctx.lineWidth = 2;
