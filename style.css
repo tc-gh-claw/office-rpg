@@ -57,7 +57,7 @@ button, input, kbd, code, pre {
     height: 100%;
     z-index: 0;
     pointer-events: none;
-    opacity: 0.28;
+    opacity: 0.55;
 }
 
 .scanlines {
@@ -144,7 +144,7 @@ button, input, kbd, code, pre {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0.78) 0%, rgba(0, 0, 0, 0.88) 100%);
+    background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.28) 0%, rgba(0, 0, 0, 0.55) 100%);
 }
 
 #app[hidden] {
@@ -154,7 +154,10 @@ button, input, kbd, code, pre {
 .topbar {
     border-bottom: 1px solid var(--matrix-dim);
     padding: 12px 16px 10px;
-    background: rgba(0, 8, 0, 0.82);
+    background: rgba(0, 8, 0, 0.92);
+    position: sticky;
+    top: 0;
+    z-index: 4;
 }
 
 .topbar-ascii {
@@ -232,7 +235,7 @@ button, input, kbd, code, pre {
 
 .panel {
     border: 1px solid var(--matrix-dim);
-    background: rgba(0, 6, 0, 0.86);
+    background: rgba(0, 6, 0, 0.92);
     display: flex;
     flex-direction: column;
     min-height: 0;
@@ -305,6 +308,12 @@ button, input, kbd, code, pre {
     border-color: var(--matrix-primary);
     background: var(--matrix-panel-strong);
     box-shadow: inset 3px 0 0 var(--matrix-primary);
+}
+
+.emp-card.is-paused.selected {
+    border-style: dashed;
+    border-color: var(--matrix-muted);
+    box-shadow: inset 3px 0 0 var(--paused);
 }
 
 .emp-card .glyph {
@@ -581,7 +590,10 @@ button, input, kbd, code, pre {
     display: flex;
     flex-wrap: wrap;
     gap: 4px 0;
-    background: rgba(0, 0, 0, 0.9);
+    background: rgba(0, 0, 0, 0.94);
+    position: sticky;
+    bottom: 0;
+    z-index: 4;
 }
 
 .statusbar kbd {

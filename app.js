@@ -252,10 +252,12 @@
             for (i = 0; i < cols; i += 1) {
                 drops[i] = Math.random() * canvas.height / fontSize;
             }
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
         function tick() {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.12)';
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.font = fontSize + 'px monospace';
             var i, x, y, ch;
@@ -263,7 +265,7 @@
                 ch = glyphs.charAt(Math.floor(Math.random() * glyphs.length));
                 x = i * fontSize;
                 y = drops[i] * fontSize;
-                ctx.fillStyle = (i % 9 === 0) ? 'rgba(176, 255, 176, 0.55)' : 'rgba(0, 255, 65, 0.38)';
+                ctx.fillStyle = (i % 9 === 0) ? 'rgba(176, 255, 176, 0.85)' : 'rgba(0, 255, 65, 0.62)';
                 ctx.fillText(ch, x, y);
                 if (y > canvas.height && Math.random() > 0.975) {
                     drops[i] = 0;
@@ -674,7 +676,7 @@
             appendBoot('<span class="ok">ok</span>  snapshot ' + escapeHtml(officeData.updated_at || 'unspecified'));
             appendBoot('<span class="ok">ok</span>  nodes ' + nodes.length + '  (AI總管 + employees)');
             msg.textContent = 'READY.';
-            await sleep(420);
+            await sleep(720);
             boot.classList.add('hidden');
             document.getElementById('app').hidden = false;
             if (!selectedId && nodes[0]) selectedId = nodes[0].id;
