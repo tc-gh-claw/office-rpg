@@ -387,19 +387,12 @@
         return '< SYS :: ' + row.text;
     }
 
-    function liveWho(kind) {
-        if (kind === 'user') return 'USER';
-        if (kind === 'ack') return 'AI總管';
-        return 'SYS';
-    }
-
     function renderLog() {
         var feedEl = document.getElementById('event-feed');
         var liveHtml = liveLog.slice().reverse().map(function (row) {
             return (
                 '<div class="event-row live ' + escapeHtml(row.kind) + '">' +
                     '<span class="when">' + escapeHtml(formatTime(row.ts)) + '</span>' +
-                    '<span class="who">' + escapeHtml(liveWho(row.kind)) + '</span>' +
                     '<span>' + escapeHtml(liveLine(row)) + '</span>' +
                 '</div>'
             );
