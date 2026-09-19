@@ -144,7 +144,8 @@ button, input, kbd, code, pre {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.28) 0%, rgba(0, 0, 0, 0.55) 100%);
+    padding: 22px 24px 16px;
+    background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.18) 0%, rgba(0, 0, 0, 0.42) 100%);
 }
 
 #app[hidden] {
