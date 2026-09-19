@@ -1,8 +1,12 @@
 # AI總管 · 員工辦公室
 
-Dragon Quest 風格嘅像素辦公室，用嚟 **睇** AI 員工隊伍：邊個閒置／忙碌／暫停、最近事件、今日 token 用量對預算。
+像素辦公室，用嚟 **睇** AI 員工隊伍：邊個閒置／忙碌／暫停、最近事件、今日 token 用量對預算。
 
 畫面係 **純靜態網站**（HTML / CSS / JS），GitHub Pages 開到就得，**唔需要後端**。資料由 `data/office-data.json` 讀入。
+
+## 視覺：Style C · Neon Cyberpunk Office
+
+近黑底（`#080c1a`）、硬像素邊、青／洋紅／檸檬霓虹。閒置青色、忙碌洋紅／檸檬脈衝、暫停灰紫、錯誤熱粉、離線暗色。畫布同側欄 HUD 有掃描線同暗角（CSS overlay，唔會每幀 `ctx.filter`）。角色仍係 Dragon Quest 式像素人，但服裝、枱面、地板改成夜間賽博辦公室（暗磚、霓虹燈帶、電子銘牌、窗外夜景），唔再係暖木牧歌。
 
 原本嗰個「蝦仔／claw」單人 NPC 辦公室已擴成 4 張枱：**AI總管**、**閃一**、**閃二**、**智一**。
 
@@ -74,7 +78,7 @@ data/office-data.json
 ```
 office-rpg/
 ├── index.html              # 畫面 + 側欄 HUD
-├── style.css               # DQ 風格樣式
+├── style.css               # Neon Cyberpunk 主題 token / HUD
 ├── game.js                 # 地圖、角色、檢查器、HUD
 ├── data/office-data.json   # 公開員工快照（請定期覆蓋）
 ├── data/README.md          # 資料格式同更新方法
@@ -87,11 +91,11 @@ office-rpg/
 
 | 狀態 | 意思 |
 |------|------|
-| 閒置 idle | 綠色，輕微擺動 |
-| 忙碌 busy | 黃色，打字／省略號 |
-| 暫停 paused | 灰色，Zz |
+| 閒置 idle | 青色霓虹，輕微擺動 |
+| 忙碌 busy | 洋紅／檸檬脈衝，打字／省略號 |
+| 暫停 paused | 灰紫，Zz |
 | 離線 offline | 暗色 |
-| 錯誤 error | 紅色閃爍 |
+| 錯誤 error | 熱粉紅閃爍 |
 
 ---
 

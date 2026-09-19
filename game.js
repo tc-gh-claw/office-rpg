@@ -1,6 +1,7 @@
 /**
  * AI總管 · 員工辦公室
- * Dragon Quest 風格像素辦公室（純靜態，讀取 data/office-data.json）
+ * Style C · Neon Cyberpunk Office（純靜態，讀取 data/office-data.json）
+ * 畫布色盤須同 style.css :root token 對齊；掃描線／暗角用 CSS，唔好喺每幀用 ctx.filter。
  */
 
 const CANVAS_WIDTH = 800;
@@ -10,12 +11,35 @@ const PLAYER_SPEED = 4;
 const INTERACT_DIST = 88;
 const DATA_FILE = 'data/office-data.json';
 
+const THEME = {
+    bg: '#080c1a',
+    floorA: '#0b1224',
+    floorB: '#10182e',
+    floorLine: '#1c2744',
+    warA: '#140c22',
+    warB: '#1a102c',
+    wall: '#0a101c',
+    wallHi: '#1a2440',
+    desk: '#161e32',
+    deskManager: '#1c1428',
+    deskTop: '#1e2840',
+    cyan: '#00e8ff',
+    magenta: '#ff2bd6',
+    lime: '#b6ff3c',
+    ink: '#050814',
+    text: '#e8f4ff',
+    muted: '#8aa0b8',
+    citySky: '#050814',
+    cityMid: '#0c1020',
+    cityFar: '#15102a'
+};
+
 const STATUS_UI = {
-    idle: { label: '閒置', color: '#51cf66', screen: '#69db7c' },
-    busy: { label: '忙碌', color: '#ffd43b', screen: '#ffd43b' },
-    paused: { label: '暫停', color: '#adb5bd', screen: '#495057' },
-    offline: { label: '離線', color: '#495057', screen: '#1a1a1a' },
-    error: { label: '錯誤', color: '#ff6b6b', screen: '#fa5252' }
+    idle: { label: '閒置', color: THEME.cyan, screen: '#00c4d8', alt: THEME.cyan },
+    busy: { label: '忙碌', color: THEME.magenta, screen: THEME.lime, alt: THEME.lime },
+    paused: { label: '暫停', color: '#6b5b8c', screen: '#2a2438', alt: '#4a3f66' },
+    offline: { label: '離線', color: '#3a3f55', screen: '#12141c', alt: '#2a2e40' },
+    error: { label: '錯誤', color: '#ff2a6d', screen: '#ff4d8d', alt: '#ff8ab3' }
 };
 
 const KIND_LABELS = {
@@ -27,12 +51,14 @@ const KIND_LABELS = {
 };
 
 const PALETTES = {
-    player: { shirt: '#4a90d9', pants: '#2c5282', hair: '#2d3748', skin: '#f6ad55' },
-    'ai-manager': { shirt: '#6b21a8', pants: '#1e1b4b', hair: '#111827', skin: '#f6ad55', accent: '#fbbf24' },
-    'gemini-a': { shirt: '#eab308', pants: '#854d0e', hair: '#1c1917', skin: '#f6ad55', accent: '#fde047' },
-    'gemini-b': { shirt: '#f97316', pants: '#9a3412', hair: '#1c1917', skin: '#fdba74', accent: '#fb923c' },
-    'chatgpt-a': { shirt: '#14b8a6', pants: '#115e59', hair: '#0f172a', skin: '#f6ad55', accent: '#5eead4' }
+    player: { shirt: '#0ea5e9', pants: '#1e293b', hair: '#0f172a', skin: '#f6ad55', accent: THEME.cyan },
+    'ai-manager': { shirt: '#4c1d95', pants: '#1e1b4b', hair: '#111827', skin: '#f6ad55', accent: THEME.magenta },
+    'gemini-a': { shirt: '#65a30d', pants: '#1a2e05', hair: '#1c1917', skin: '#f6ad55', accent: THEME.lime },
+    'gemini-b': { shirt: '#db2777', pants: '#4a044e', hair: '#1c1917', skin: '#fdba74', accent: THEME.magenta },
+    'chatgpt-a': { shirt: '#155e75', pants: '#083344', hair: '#0f172a', skin: '#f6ad55', accent: '#22d3ee' }
 };
+
+const fx = { city: null };
 
 const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
@@ -545,131 +571,325 @@ function update(deltaTime) {
     });
 }
 
-function drawObject(x, y, w, h, color) {
-    ctx.fillStyle = 'rgba(0,0,0,0.3)';
-    ctx.fillRect(x + 4, y + 6, w, h);
+function bakeFx() {
+    const c = document.createElement('canvas');
+    c.width = 520;
+    c.height = 56;
+    const g = c.getContext('2d');
+    g.imageSmoothingEnabled = false;
+    g.fillStyle = THEME.citySky;
+    g.fillRect(0, 0, 520, 56);
+    g.fillStyle = '#12081c';
+    g.fillRect(0, 40, 520, 16);
+    g.fillStyle = '#0a1830';
+    g.fillRect(0, 34, 520, 8);
+
+    const buildings = [
+        [0, 28, 36, THEME.cityFar], [28, 18, 44, THEME.cityMid], [62, 34, 30, '#101428'],
+        [90, 22, 48, THEME.cityFar], [128, 40, 22, '#0e1628'], [148, 16, 50, THEME.cityMid],
+        [190, 30, 38, '#12101f'], [224, 12, 44, THEME.cityFar], [260, 26, 36, THEME.cityMid],
+        [292, 38, 24, '#0c1424'], [312, 14, 52, '#16122a'], [356, 32, 30, THEME.cityMid],
+        [382, 20, 46, THEME.cityFar], [420, 36, 28, '#101428'], [444, 10, 54, THEME.cityMid],
+        [490, 28, 30, THEME.cityFar]
+    ];
+    const windowColors = [THEME.cyan, THEME.magenta, THEME.lime, '#ffcc66', '#66aaff'];
+    buildings.forEach(function (b, bi) {
+        const x = b[0];
+        const top = 56 - b[2];
+        g.fillStyle = b[3];
+        g.fillRect(x, top, b[1], b[2]);
+        g.fillStyle = '#05060c';
+        g.fillRect(x + b[1] - 3, top, 3, b[2]);
+        for (let wy = top + 4; wy < 52; wy += 6) {
+            for (let wx = x + 3; wx < x + b[1] - 5; wx += 5) {
+                const lit = ((wx * 13 + wy * 7 + bi * 3) % 11) > 4;
+                if (!lit) continue;
+                g.fillStyle = windowColors[(wx + wy + bi) % windowColors.length];
+                g.fillRect(wx, wy, 2, 3);
+            }
+        }
+    });
+    g.fillStyle = THEME.magenta;
+    g.fillRect(232, 8, 38, 8);
+    g.fillStyle = THEME.ink;
+    g.fillRect(236, 10, 8, 4);
+    g.fillRect(246, 10, 8, 4);
+    g.fillRect(256, 10, 10, 4);
+    fx.city = c;
+}
+
+function stampGlow(x, y, w, h, color) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.fillStyle = color;
+    ctx.globalAlpha = 0.16;
+    ctx.fillRect(x - 3, y - 3, w + 6, h + 6);
+    ctx.globalAlpha = 0.28;
+    ctx.fillRect(x - 1, y - 1, w + 2, h + 2);
+    ctx.restore();
+}
+
+function drawObject(x, y, w, h, color, edge) {
+    ctx.fillStyle = 'rgba(0,0,0,0.45)';
+    ctx.fillRect(x + 3, y + 5, w, h);
     ctx.fillStyle = color;
     ctx.fillRect(x, y, w, h);
-    ctx.fillStyle = 'rgba(255,255,255,0.22)';
-    ctx.fillRect(x, y, w, 3);
-    ctx.fillRect(x, y, 3, h);
-    ctx.fillStyle = 'rgba(0,0,0,0.22)';
+    ctx.fillStyle = edge || THEME.cyan;
+    ctx.fillRect(x, y, w, 2);
+    ctx.fillStyle = 'rgba(232, 244, 255, 0.08)';
+    ctx.fillRect(x, y + 2, 3, h - 2);
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
     ctx.fillRect(x, y + h - 3, w, 3);
     ctx.fillRect(x + w - 3, y, 3, h);
 }
 
 function drawShadow(x, y, w, h) {
-    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
     ctx.fillRect(x, y, w, h);
 }
 
-function drawLabel(text, x, y, bg) {
+function drawPlate(text, x, y, neon, fill) {
     ctx.font = 'bold 11px "Noto Sans HK", sans-serif';
-    const w = Math.max(48, ctx.measureText(text).width + 10);
+    const w = Math.max(52, Math.ceil(ctx.measureText(text).width + 12));
     const px = Math.floor(x - w / 2);
-    ctx.fillStyle = bg || '#ffd43b';
+    ctx.fillStyle = fill || THEME.ink;
     ctx.fillRect(px, y, w, 14);
-    ctx.strokeStyle = '#212529';
+    ctx.strokeStyle = neon || THEME.cyan;
     ctx.lineWidth = 2;
     ctx.strokeRect(px, y, w, 14);
-    ctx.fillStyle = '#212529';
-    ctx.fillText(text, px + 5, y + 11);
+    ctx.fillStyle = neon || THEME.cyan;
+    ctx.fillRect(px, y, 4, 2);
+    ctx.fillRect(px + w - 4, y + 12, 4, 2);
+    ctx.fillStyle = THEME.text;
+    ctx.fillText(text, px + 6, y + 11);
+}
+
+function drawLabel(text, x, y, bg) {
+    drawPlate(text, x, y, bg, THEME.ink);
+}
+
+function drawZoneLabel(text, x, y, neon) {
+    drawPlate(text, x, y, neon, THEME.ink);
+}
+
+function drawCityWindow() {
+    const x = 248;
+    const y = 38;
+    const w = 500;
+    const h = 46;
+    ctx.fillStyle = THEME.wall;
+    ctx.fillRect(x - 4, y - 4, w + 8, h + 10);
+    if (fx.city) {
+        ctx.drawImage(fx.city, 0, 0, fx.city.width, fx.city.height, x, y, w, h);
+    } else {
+        ctx.fillStyle = THEME.citySky;
+        ctx.fillRect(x, y, w, h);
+    }
+    const t = lastTime || 0;
+    ctx.fillStyle = 'rgba(186, 230, 255, 0.4)';
+    for (let i = 0; i < 26; i++) {
+        const rx = x + ((i * 53 + Math.floor(t / 18)) % (w - 4));
+        const ry = y + ((i * 17 + Math.floor(t / 10)) % (h - 6));
+        ctx.fillRect(rx, ry, 1, 5);
+    }
+    ctx.strokeStyle = THEME.cyan;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x, y, w, h);
+    ctx.fillStyle = THEME.wallHi;
+    ctx.fillRect(x + Math.floor(w / 3) - 2, y, 4, h);
+    ctx.fillRect(x + Math.floor(w * 2 / 3) - 2, y, 4, h);
+}
+
+function drawWallClock() {
+    let hk = '--:--';
+    try {
+        hk = new Date().toLocaleTimeString('zh-HK', {
+            timeZone: 'Asia/Hong_Kong',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        });
+    } catch (err) { /* keep fallback */ }
+    ctx.fillStyle = THEME.ink;
+    ctx.fillRect(164, 48, 54, 20);
+    ctx.strokeStyle = THEME.lime;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(164, 48, 54, 20);
+    ctx.fillStyle = THEME.lime;
+    ctx.font = '11px "Share Tech Mono", monospace';
+    ctx.fillText(hk, 172, 62);
+}
+
+function drawNeonSign() {
+    const flicker = Math.floor((lastTime || 0) / 420) % 7 === 0;
+    ctx.fillStyle = THEME.ink;
+    ctx.fillRect(58, 48, 92, 18);
+    ctx.strokeStyle = flicker ? '#6b5b8c' : THEME.magenta;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(58, 48, 92, 18);
+    ctx.fillStyle = flicker ? '#6b5b8c' : THEME.magenta;
+    ctx.font = 'bold 11px "Noto Sans HK", sans-serif';
+    ctx.fillText('AI總管', 74, 61);
 }
 
 function drawFloor() {
-    ctx.fillStyle = '#2d3a4a';
+    ctx.fillStyle = THEME.bg;
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+    ctx.fillStyle = THEME.wall;
+    ctx.fillRect(0, 0, CANVAS_WIDTH, 36);
+    ctx.fillRect(0, 564, CANVAS_WIDTH, 36);
+    ctx.fillRect(0, 0, 36, CANVAS_HEIGHT);
+    ctx.fillRect(764, 0, 36, CANVAS_HEIGHT);
+    ctx.fillStyle = THEME.wallHi;
+    ctx.fillRect(36, 34, 728, 2);
 
     for (let y = 36; y < CANVAS_HEIGHT - 36; y += TILE_SIZE) {
         for (let x = 36; x < CANVAS_WIDTH - 36; x += TILE_SIZE) {
             const inWar = x < 232 && y < 340;
             const isEven = ((x / TILE_SIZE) + (y / TILE_SIZE)) % 2 === 0;
-            if (inWar) ctx.fillStyle = isEven ? '#5c3d4a' : '#4a303b';
-            else ctx.fillStyle = isEven ? '#4a5568' : '#3d4852';
+            ctx.fillStyle = inWar
+                ? (isEven ? THEME.warA : THEME.warB)
+                : (isEven ? THEME.floorA : THEME.floorB);
             ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-            ctx.strokeStyle = inWar ? '#7a5560' : '#5a6578';
+            ctx.strokeStyle = THEME.floorLine;
             ctx.lineWidth = 1;
             ctx.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
         }
     }
 
-    ctx.strokeStyle = '#c9a227';
-    ctx.lineWidth = 3;
+    ctx.fillStyle = THEME.magenta;
+    ctx.fillRect(36, 36, 196, 2);
+    ctx.fillStyle = THEME.cyan;
+    ctx.fillRect(232, 36, 532, 2);
+    ctx.fillStyle = THEME.cyan;
+    ctx.fillRect(232, 352, 532, 2);
+    ctx.fillStyle = THEME.magenta;
+    ctx.fillRect(36, 352, 196, 2);
+    ctx.fillStyle = THEME.lime;
+    ctx.fillRect(248, 248, 2, 200);
+
+    ctx.strokeStyle = THEME.magenta;
+    ctx.lineWidth = 2;
     ctx.strokeRect(44, 48, 188, 280);
 
-    ctx.font = 'bold 12px "Noto Sans HK", sans-serif';
-    ctx.fillStyle = '#ffd43b';
-    ctx.fillText('派工室', 58, 86);
-    ctx.fillText('開放式辦公區', 300, 86);
-    ctx.fillText('茶水間', 72, 422);
-    ctx.fillText('會議室', 620, 382);
+    drawCityWindow();
+    drawNeonSign();
+    drawWallClock();
+
+    drawZoneLabel('派工室', 102, 74, THEME.magenta);
+    drawZoneLabel('開放式辦公區', 400, 44, THEME.cyan);
+    drawZoneLabel('茶水間', 126, 418, THEME.lime);
+    drawZoneLabel('會議室', 652, 378, THEME.cyan);
+}
+
+function drawMonitor(mx, my, mw, mh, npc) {
+    const st = statusInfo(npc.status);
+    ctx.fillStyle = '#05060c';
+    ctx.fillRect(mx, my, mw, mh);
+    let screen = st.screen;
+    if (npc.status === 'busy') {
+        screen = npc.animFrame ? THEME.lime : THEME.magenta;
+    } else if (npc.status === 'error') {
+        screen = npc.animFrame ? '#ff8ab3' : '#ff2a6d';
+    }
+    ctx.fillStyle = screen;
+    ctx.fillRect(mx + 3, my + 3, mw - 6, mh - 8);
+    if (npc.status !== 'offline' && npc.status !== 'paused') {
+        stampGlow(mx + 3, my + 3, mw - 6, mh - 8, screen);
+    }
+    if (npc.status === 'busy') {
+        ctx.fillStyle = THEME.ink;
+        const t = npc.animFrame;
+        ctx.fillRect(mx + 6, my + 7 + t, mw - 12, 2);
+        ctx.fillRect(mx + 8, my + 12, mw - 16 - t * 4, 2);
+    } else if (npc.status === 'paused') {
+        ctx.fillStyle = 'rgba(8, 6, 16, 0.55)';
+        ctx.fillRect(mx + 3, my + 3, mw - 6, mh - 8);
+    } else if (npc.status === 'error') {
+        ctx.fillStyle = npc.animFrame ? THEME.text : THEME.ink;
+        ctx.fillRect(mx + Math.floor(mw / 2) - 2, my + 6, 4, 10);
+        ctx.fillRect(mx + Math.floor(mw / 2) - 2, my + 18, 4, 4);
+    } else if (npc.status === 'idle') {
+        ctx.fillStyle = THEME.ink;
+        ctx.fillRect(mx + 8, my + 10, mw - 16, 2);
+    }
+    ctx.fillStyle = '#1a2030';
+    ctx.fillRect(mx + Math.floor(mw / 2) - 4, my + mh - 5, 8, 4);
 }
 
 function drawDesk(npc) {
     const d = npc.desk;
-    const wood = npc.isManager ? '#5c3d1e' : '#8b5a2b';
-    drawObject(d.x, d.y, d.w, d.h, wood);
+    const body = npc.isManager ? THEME.deskManager : THEME.desk;
+    const edge = npc.isManager ? THEME.magenta : THEME.cyan;
+    drawObject(d.x, d.y, d.w, d.h, body, edge);
 
     const st = statusInfo(npc.status);
     const mx = d.x + 12;
     const my = d.y + 10;
     const mw = npc.isManager ? 56 : 40;
     const mh = 28;
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(mx, my, mw, mh);
-    ctx.fillStyle = st.screen;
-    ctx.fillRect(mx + 3, my + 3, mw - 6, mh - 8);
-    if (npc.status === 'busy') {
-        ctx.fillStyle = '#212529';
-        const t = npc.animFrame;
-        ctx.fillRect(mx + 6, my + 7 + t, mw - 12, 2);
-        ctx.fillRect(mx + 8, my + 12, mw - 16 - t * 4, 2);
-    } else if (npc.status === 'paused') {
-        ctx.fillStyle = 'rgba(0,0,0,0.35)';
-        ctx.fillRect(mx + 3, my + 3, mw - 6, mh - 8);
-    } else if (npc.status === 'error') {
-        ctx.fillStyle = npc.animFrame ? '#fff' : '#ff6b6b';
-        ctx.fillRect(mx + Math.floor(mw / 2) - 2, my + 6, 4, 10);
-        ctx.fillRect(mx + Math.floor(mw / 2) - 2, my + 18, 4, 4);
-    }
+    drawMonitor(mx, my, mw, mh, npc);
 
-    ctx.fillStyle = '#ced4da';
+    ctx.fillStyle = THEME.deskTop;
     ctx.fillRect(d.x + d.w - 36, d.y + 14, 22, 16);
     ctx.fillStyle = st.color;
     ctx.fillRect(d.x + 8, d.y + d.h - 10, 10, 6);
+    ctx.fillStyle = edge;
+    ctx.fillRect(d.x + 2, d.y + d.h - 4, d.w - 4, 2);
 
     if (npc.isManager) {
-        ctx.fillStyle = '#fbbf24';
+        ctx.fillStyle = THEME.ink;
         ctx.fillRect(d.x + 78, d.y + 16, 34, 26);
-        ctx.fillStyle = '#212529';
+        ctx.strokeStyle = THEME.lime;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(d.x + 78, d.y + 16, 34, 26);
+        ctx.fillStyle = THEME.lime;
         ctx.fillRect(d.x + 82, d.y + 20, 26, 3);
         ctx.fillRect(d.x + 82, d.y + 26, 18, 3);
+        ctx.fillRect(d.x + 82, d.y + 32, 22, 3);
     }
 }
 
+function drawRack(x, y, accent) {
+    drawObject(x, y, 28, 36, '#141a28', accent);
+    const leds = [THEME.cyan, THEME.lime, THEME.magenta, THEME.cyan];
+    leds.forEach(function (c, i) {
+        ctx.fillStyle = c;
+        ctx.fillRect(x + 5 + (i % 2) * 10, y + 8 + Math.floor(i / 2) * 10, 6, 4);
+    });
+}
+
 function drawStaticProps() {
-    drawObject(56, 430, 140, 92, '#4a5568');
-    ctx.fillStyle = '#e8590c';
-    ctx.fillRect(76, 446, 28, 22);
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(84, 452, 12, 8);
-    ctx.fillStyle = '#7950f2';
+    drawObject(56, 430, 140, 92, '#141a28', THEME.lime);
+    ctx.fillStyle = '#1a0820';
+    ctx.fillRect(76, 446, 28, 36);
+    ctx.fillStyle = THEME.magenta;
+    ctx.fillRect(80, 450, 20, 8);
+    ctx.fillStyle = THEME.cyan;
     ctx.fillRect(120, 450, 18, 28);
-    ctx.fillStyle = '#ffd43b';
+    ctx.fillStyle = THEME.lime;
     ctx.fillRect(150, 458, 22, 16);
+    ctx.fillStyle = THEME.ink;
+    ctx.fillRect(84, 462, 12, 8);
 
-    drawObject(560, 390, 186, 112, '#5c4033');
-    ctx.fillStyle = '#8b5a2b';
+    drawObject(560, 390, 186, 112, '#141820', THEME.cyan);
+    ctx.fillStyle = '#0c1424';
     ctx.fillRect(580, 410, 146, 52);
+    ctx.fillStyle = THEME.cyan;
+    ctx.fillRect(580, 410, 146, 2);
+    ctx.fillRect(580, 460, 146, 2);
 
-    drawObject(248, 448, 44, 40, '#718096');
-    ctx.fillStyle = '#2d3748';
+    drawObject(248, 448, 44, 40, '#1a2230', THEME.muted);
+    ctx.fillStyle = '#0a1018';
     ctx.fillRect(254, 454, 32, 10);
+    ctx.fillStyle = THEME.lime;
+    ctx.fillRect(258, 456, 6, 4);
 
-    drawObject(48, 48, 28, 28, '#2f9e44');
-    drawObject(724, 48, 28, 28, '#2f9e44');
-    drawObject(724, 500, 28, 28, '#2f9e44');
-    drawObject(48, 500, 28, 28, '#2f9e44');
+    drawRack(48, 90, THEME.cyan);
+    drawRack(724, 82, THEME.magenta);
+    drawRack(724, 500, THEME.lime);
+    drawRack(48, 500, THEME.cyan);
 }
 
 function drawCharacter(ch, facing) {
@@ -679,8 +899,12 @@ function drawCharacter(ch, facing) {
     const y = ch.y + (ch.bobOffset || 0);
     const w = ch.width;
     const h = ch.height;
-    const shirt = dim ? '#868e96' : pal.shirt;
-    const pants = dim ? '#495057' : pal.pants;
+    const shirt = dim ? '#3a3f55' : pal.shirt;
+    const pants = dim ? '#2a2e40' : pal.pants;
+    const visor = dim ? '#4a3f66' : (pal.accent || THEME.cyan);
+
+    ctx.fillStyle = THEME.ink;
+    ctx.fillRect(x + 3, y, w - 6, h);
 
     ctx.fillStyle = shirt;
     ctx.fillRect(x + 4, y + 12, w - 8, h - 12);
@@ -692,20 +916,20 @@ function drawCharacter(ch, facing) {
     ctx.fillRect(x + w - 8, y, 4, 10);
 
     if (ch.isManager) {
-        ctx.fillStyle = pal.accent || '#fbbf24';
+        ctx.fillStyle = pal.accent || THEME.magenta;
         ctx.fillRect(x + 8, y - 4, 8, 4);
-        ctx.fillStyle = '#1a202c';
-        ctx.fillRect(x + 6, y + 5, w - 12, 2);
+        ctx.fillStyle = THEME.ink;
+        ctx.fillRect(x + 6, y + 4, w - 12, 3);
     }
 
-    ctx.fillStyle = '#1a202c';
+    ctx.fillStyle = visor;
     const dir = facing || 'down';
-    if (dir === 'right') ctx.fillRect(x + 14, y + 6, 3, 3);
-    else if (dir === 'left') ctx.fillRect(x + 7, y + 6, 3, 3);
-    else {
-        ctx.fillRect(x + 8, y + 6, 3, 3);
-        ctx.fillRect(x + 13, y + 6, 3, 3);
-    }
+    if (dir === 'right') ctx.fillRect(x + 12, y + 6, 7, 3);
+    else if (dir === 'left') ctx.fillRect(x + 5, y + 6, 7, 3);
+    else ctx.fillRect(x + 7, y + 6, w - 14, 3);
+    ctx.fillStyle = THEME.ink;
+    ctx.fillRect(x + 8, y + 7, 2, 1);
+    ctx.fillRect(x + 14, y + 7, 2, 1);
 
     ctx.fillStyle = pants;
     if (ch.isMoving && ch.animFrame % 2 === 0) {
@@ -723,18 +947,20 @@ function drawCharacter(ch, facing) {
     }
 
     if (ch.status === 'busy') {
-        ctx.fillStyle = '#fff';
+        const bubble = ch.animFrame ? THEME.lime : THEME.magenta;
+        ctx.fillStyle = THEME.ink;
         ctx.fillRect(x + w + 2, y + 4, 16, 10);
-        ctx.strokeStyle = '#212529';
+        ctx.strokeStyle = bubble;
+        ctx.lineWidth = 2;
         ctx.strokeRect(x + w + 2, y + 4, 16, 10);
-        ctx.fillStyle = '#212529';
-        ctx.font = '9px monospace';
+        ctx.fillStyle = bubble;
+        ctx.font = '9px "Share Tech Mono", monospace';
         ctx.fillText('…', x + w + 5, y + 12);
     }
     if (ch.status === 'error' && ch.animFrame) {
-        ctx.fillStyle = '#ff6b6b';
+        ctx.fillStyle = '#ff2a6d';
         ctx.fillRect(x + 8, y - 12, 8, 8);
-        ctx.fillStyle = '#fff';
+        ctx.fillStyle = THEME.text;
         ctx.fillRect(x + 11, y - 10, 2, 4);
     }
 }
@@ -772,17 +998,17 @@ function drawNpc(npc) {
     if (npc.status === 'paused') {
         const zx = npc.x + npc.width + 4;
         const zy = npc.y - 36;
-        ctx.fillStyle = '#f8f9fa';
+        ctx.fillStyle = THEME.ink;
         ctx.fillRect(zx, zy, 24, 16);
-        ctx.strokeStyle = '#212529';
+        ctx.strokeStyle = '#6b5b8c';
         ctx.lineWidth = 2;
         ctx.strokeRect(zx, zy, 24, 16);
-        ctx.fillStyle = '#495057';
-        ctx.font = 'bold 11px "Noto Sans HK", sans-serif';
+        ctx.fillStyle = '#a090c0';
+        ctx.font = 'bold 11px "Share Tech Mono", monospace';
         ctx.fillText('Zz', zx + 5, zy + 12);
     }
     if (selectedId === npc.id) {
-        ctx.strokeStyle = '#ffd43b';
+        ctx.strokeStyle = THEME.cyan;
         ctx.lineWidth = 2;
         ctx.strokeRect(npc.x - 4, npc.y - 6, npc.width + 8, npc.height + 10);
     }
@@ -887,6 +1113,7 @@ function bindInput() {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+    bakeFx();
     bindInput();
     loadOfficeData();
     requestAnimationFrame(gameLoop);

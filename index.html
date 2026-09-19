@@ -4,20 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI總管 · 員工辦公室</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐉</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23080c1a'/><rect x='18' y='18' width='64' height='64' fill='none' stroke='%2300e8ff' stroke-width='8'/><rect x='40' y='40' width='20' height='20' fill='%23ff2bd6'/></svg>">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="app">
         <div id="game-container">
             <canvas id="game-canvas" width="800" height="600"></canvas>
-
-            <div id="hint">
-                <kbd>WASD</kbd> 移動　
-                <kbd>空白鍵</kbd> 查看員工　
-                <kbd>1-4</kbd> 快速揀人　
-                <kbd>Esc</kbd> 關閉
-            </div>
+            <div class="fx-vignette" aria-hidden="true"></div>
+            <div class="fx-scanlines" aria-hidden="true"></div>
+            <div class="fx-sweep" aria-hidden="true"></div>
 
             <div id="interaction-hint">▼ 撳空白鍵查看</div>
 
@@ -47,7 +43,7 @@
             </div>
 
             <div id="loading">
-                <div class="dragon">🐉</div>
+                <div class="boot-mark" aria-hidden="true"></div>
                 <h1>AI總管 · 員工辦公室</h1>
                 <p id="loading-msg">載入員工資料中…</p>
             </div>
@@ -55,9 +51,15 @@
 
         <aside id="hud-panel">
             <div>
-                <div class="hud-kicker">OFFICE STATUS</div>
+                <div class="hud-kicker">樓層狀態 // NODE</div>
                 <h1 id="office-name">AI總管 · 員工辦公室</h1>
                 <p id="updated-at">讀取資料中…</p>
+                <div id="hint">
+                    <kbd>WASD</kbd> 移動　
+                    <kbd>空白鍵</kbd> 查看員工　
+                    <kbd>1-4</kbd> 快速揀人　
+                    <kbd>Esc</kbd> 關閉
+                </div>
             </div>
             <section class="hud-section">
                 <h2>員工名單</h2>
@@ -68,11 +70,11 @@
                 <div class="event-feed" id="event-feed"></div>
             </section>
             <p class="hud-legend">
-                <span class="legend-dot" style="background:#51cf66"></span>閒置
-                <span class="legend-dot" style="background:#ffd43b"></span>忙碌
-                <span class="legend-dot" style="background:#adb5bd"></span>暫停
-                <span class="legend-dot" style="background:#495057"></span>離線
-                <span class="legend-dot" style="background:#ff6b6b"></span>錯誤
+                <span class="legend-dot idle"></span>閒置
+                <span class="legend-dot busy"></span>忙碌
+                <span class="legend-dot paused"></span>暫停
+                <span class="legend-dot offline"></span>離線
+                <span class="legend-dot error"></span>錯誤
                 <br>
                 資料來源：<code>data/office-data.json</code>（靜態，無需後端）
             </p>
