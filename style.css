@@ -43,10 +43,14 @@ html, body {
 
 body {
     font-family: var(--ui);
-    background:
+    background-color: var(--bg-deep);
+    background-image:
+        linear-gradient(rgba(0, 232, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 232, 255, 0.04) 1px, transparent 1px),
         radial-gradient(ellipse at 20% 0%, rgba(255, 43, 214, 0.12) 0%, transparent 42%),
         radial-gradient(ellipse at 90% 10%, rgba(0, 232, 255, 0.1) 0%, transparent 46%),
         linear-gradient(180deg, #0c1224 0%, var(--bg) 40%, var(--bg-deep) 100%);
+    background-size: 40px 40px, 40px 40px, auto, auto, auto;
     color: var(--text);
     min-height: 100vh;
     overflow-x: hidden;
@@ -65,13 +69,13 @@ kbd, .pixel-title, #loading h1, .speaker, .hud-kicker, #send-btn,
     align-items: flex-start;
     gap: 14px;
     padding: 16px 12px 28px;
-    max-width: 1280px;
+    max-width: 1440px;
     margin: 0 auto;
 }
 
 #game-container {
     position: relative;
-    width: 800px;
+    width: min(960px, 100%);
     max-width: 100%;
     height: auto;
     aspect-ratio: 800 / 600;
@@ -112,12 +116,12 @@ kbd, .pixel-title, #loading h1, .speaker, .hud-kicker, #send-btn,
 .fx-scanlines {
     background: repeating-linear-gradient(
         0deg,
-        rgba(0, 0, 0, 0.18) 0px,
-        rgba(0, 0, 0, 0.18) 1px,
+        rgba(0, 0, 0, 0.28) 0px,
+        rgba(0, 0, 0, 0.28) 1px,
         transparent 1px,
-        transparent 3px
+        transparent 4px
     );
-    opacity: 0.55;
+    opacity: 0.65;
 }
 
 .fx-sweep {
@@ -134,19 +138,15 @@ kbd, .pixel-title, #loading h1, .speaker, .hud-kicker, #send-btn,
 }
 
 #hint {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    left: auto;
+    position: static;
     color: var(--text);
     font-size: 12px;
     font-family: var(--ui);
-    background: var(--glass);
-    padding: 8px 12px;
-    border: 2px solid var(--cyan);
-    box-shadow: 3px 3px 0 var(--bg-deep);
-    pointer-events: none;
-    max-width: min(420px, calc(100% - 24px));
+    background: rgba(5, 8, 20, 0.72);
+    padding: 8px 10px;
+    border: 2px solid #1c3a52;
+    margin-top: 8px;
+    max-width: none;
     z-index: 3;
 }
 
@@ -450,9 +450,9 @@ kbd, .pixel-title, #loading h1, .speaker, .hud-kicker, #send-btn,
 
 #hud-panel {
     position: relative;
-    width: 340px;
+    width: 360px;
     max-width: 100%;
-    min-height: 600px;
+    min-height: 720px;
     background: linear-gradient(180deg, rgba(12, 20, 40, 0.94) 0%, rgba(8, 12, 26, 0.98) 100%);
     color: var(--text);
     border: 2px solid var(--cyan);
@@ -689,9 +689,9 @@ kbd, .pixel-title, #loading h1, .speaker, .hud-kicker, #send-btn,
     font-size: 13px;
 }
 
-@media (max-width: 1180px) {
+@media (max-width: 1360px) {
     #hud-panel {
-        width: min(800px, 100%);
+        width: min(960px, 100%);
         min-height: 0;
     }
 }

@@ -676,7 +676,7 @@ function drawCityWindow() {
     const x = 248;
     const y = 38;
     const w = 500;
-    const h = 42;
+    const h = 46;
     ctx.fillStyle = THEME.wall;
     ctx.fillRect(x - 4, y - 4, w + 8, h + 10);
     if (fx.city) {
@@ -686,7 +686,7 @@ function drawCityWindow() {
         ctx.fillRect(x, y, w, h);
     }
     const t = lastTime || 0;
-    ctx.fillStyle = 'rgba(186, 230, 255, 0.32)';
+    ctx.fillStyle = 'rgba(186, 230, 255, 0.4)';
     for (let i = 0; i < 26; i++) {
         const rx = x + ((i * 53 + Math.floor(t / 18)) % (w - 4));
         const ry = y + ((i * 17 + Math.floor(t / 10)) % (h - 6));
@@ -778,7 +778,7 @@ function drawFloor() {
     drawWallClock();
 
     drawZoneLabel('派工室', 102, 74, THEME.magenta);
-    drawZoneLabel('開放式辦公區', 420, 12, THEME.cyan);
+    drawZoneLabel('開放式辦公區', 400, 44, THEME.cyan);
     drawZoneLabel('茶水間', 126, 418, THEME.lime);
     drawZoneLabel('會議室', 652, 378, THEME.cyan);
 }
@@ -903,6 +903,9 @@ function drawCharacter(ch, facing) {
     const pants = dim ? '#2a2e40' : pal.pants;
     const visor = dim ? '#4a3f66' : (pal.accent || THEME.cyan);
 
+    ctx.fillStyle = THEME.ink;
+    ctx.fillRect(x + 3, y, w - 6, h);
+
     ctx.fillStyle = shirt;
     ctx.fillRect(x + 4, y + 12, w - 8, h - 12);
     ctx.fillStyle = pal.skin;
@@ -924,6 +927,9 @@ function drawCharacter(ch, facing) {
     if (dir === 'right') ctx.fillRect(x + 12, y + 6, 7, 3);
     else if (dir === 'left') ctx.fillRect(x + 5, y + 6, 7, 3);
     else ctx.fillRect(x + 7, y + 6, w - 14, 3);
+    ctx.fillStyle = THEME.ink;
+    ctx.fillRect(x + 8, y + 7, 2, 1);
+    ctx.fillRect(x + 14, y + 7, 2, 1);
 
     ctx.fillStyle = pants;
     if (ch.isMoving && ch.animFrame % 2 === 0) {
