@@ -79,25 +79,6 @@
                 </div>
                 <div id="event-feed" class="event-feed" role="log" aria-live="polite"></div>
             </section>
-
-            <section class="panel" id="cmd-panel" aria-labelledby="cmd-title">
-                <div class="panel-title" id="cmd-title">
-                    <span class="panel-tag">05</span>
-                    主管指令 / MANAGER CMD
-                    <span class="panel-hint">ENTER 送出</span>
-                </div>
-                <form id="cmd-form" class="cmd-form">
-                    <div class="prompt-row">
-                        <label class="ps1" for="manager-command-input">CMD &gt;</label>
-                        <input id="manager-command-input" name="command" type="text" maxlength="4000"
-                            autocomplete="off" spellcheck="false"
-                            placeholder="向 AI總管／主管發出指令…"
-                            aria-label="主管指令">
-                        <button type="submit" id="manager-send-btn">發送</button>
-                    </div>
-                    <p id="cmd-ack" class="cmd-ack empty" aria-live="polite">&gt; 等待指令。靜態站會打去 Vercel API；真正執行靠 webhook，呢頁只顯示 ACK。</p>
-                </form>
-            </section>
         </main>
 
         <footer class="statusbar">
@@ -105,7 +86,7 @@
             <span class="sep">//</span>
             <span>STATUS <span class="legend idle">IDLE 閒置</span> <span class="legend busy">BUSY 忙碌</span> <span class="legend paused">PAUSED 暫停</span> <span class="legend offline">OFFLINE 離線</span> <span class="legend error">ERROR 錯誤</span></span>
             <span class="sep">//</span>
-            <span>PANEL 05 主管指令 · PAGES 只讀 · CMD → VERCEL</span>
+            <span>READ-ONLY SNAPSHOT · NO SECRETS</span>
         </footer>
     </div>
 

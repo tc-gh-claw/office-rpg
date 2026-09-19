@@ -6,8 +6,7 @@
   "scripts": {
     "start": "node api/index.js",
     "dev": "node api/index.js",
-    "static": "python3 -m http.server 4173",
-    "test": "node scripts/test-manager-command.js"
+    "static": "python3 -m http.server 4173"
   },
   "dependencies": {
     "cors": "^2.8.6",
