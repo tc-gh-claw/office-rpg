@@ -6,8 +6,8 @@
 const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 600;
 const TILE_SIZE = 32;
-const PLAYER_SPEED = 3;
-const INTERACT_DIST = 72;
+const PLAYER_SPEED = 4;
+const INTERACT_DIST = 88;
 const DATA_FILE = 'data/office-data.json';
 
 const STATUS_UI = {
@@ -100,6 +100,7 @@ function kindLabel(kind) {
 function formatTime(iso) {
     try {
         return new Date(iso).toLocaleString('zh-HK', {
+            timeZone: 'Asia/Hong_Kong',
             month: 'numeric',
             day: 'numeric',
             hour: '2-digit',
@@ -352,13 +353,6 @@ function openInspector(npc) {
     speaker.textContent = npc.displayName + (npc.isManager ? ' · 總管' : '');
     box.classList.add('active');
 
-    const notes = [];
-    if (npc.roleTitle) notes.push(npc.roleTitle);
-    if (npc.specialty && npc.specialty.length) notes.push('專長：' + npc.specialty.join('、'));
-    if (npc.status === 'paused') notes.push('呢位員工而家暫停接工。');
-    if (npc.status === 'error') notes.push('最近狀態異常，請睇事件紀錄。');
-    if (last && last.ok === false) notes.push('最近一次事件失敗：' + (last.text || kindLabel(last.kind)));
-
     meta.innerHTML =
         '<div><dt>狀態</dt><dd>' + escapeHtml(st.label) + '</dd></div>' +
         '<div><dt>模型</dt><dd>' + escapeHtml(npc.model) + '</dd></div>' +
@@ -369,18 +363,24 @@ function openInspector(npc) {
                 : (npc.isManager ? '—' : '無資料')) +
         '</dd></div>';
 
-    let body = '';
+    const lines = [];
     if (last && last.text) {
-        body = '最後回覆預覽：\n「' + last.text + '」\n';
-        if (last.model) body += '當時模型：' + last.model + '\n';
-        body += 'Token：in ' + (last.input_tokens || 0) + ' / out ' + (last.output_tokens || 0);
+        lines.push('最後回覆預覽：');
+        lines.push('「' + last.text + '」');
+        if (last.model) lines.push('當時模型：' + last.model);
+        lines.push('Token：in ' + (last.input_tokens || 0) + ' / out ' + (last.output_tokens || 0));
     } else if (npc.isManager) {
-        body = '我係 AI總管，負責分派工作俾閃一、閃二、智一。呢度顯示嘅係公開快照，唔會即場呼叫模型。';
+        lines.push('我係 AI總管，負責分派工作俾閃一、閃二、智一。');
+        lines.push('呢度顯示嘅係公開快照，唔會即場呼叫模型。');
     } else {
-        body = '尚未有回覆預覽。狀態備註：' + (notes.join(' ') || '無。');
+        lines.push('尚未有回覆預覽。');
     }
-    if (notes.length) body += '\n\n' + notes.join('\n');
-    text.textContent = body;
+    if (npc.roleTitle) lines.push('職稱：' + npc.roleTitle);
+    if (npc.specialty && npc.specialty.length) lines.push('專長：' + npc.specialty.join('、'));
+    if (npc.status === 'paused') lines.push('呢位員工而家暫停接工。');
+    if (npc.status === 'error') lines.push('最近狀態異常，請睇事件紀錄。');
+    if (last && last.ok === false) lines.push('最近一次事件失敗：' + (last.text || kindLabel(last.kind)));
+    text.textContent = lines.join('\n');
 
     const recent = eventsFor(npc.id).slice().reverse().slice(0, 6);
     if (!recent.length) {
@@ -599,8 +599,8 @@ function drawFloor() {
 
     ctx.font = 'bold 12px "Noto Sans HK", sans-serif';
     ctx.fillStyle = '#ffd43b';
-    ctx.fillText('派工室', 58, 68);
-    ctx.fillText('開放式辦公區', 300, 68);
+    ctx.fillText('派工室', 58, 86);
+    ctx.fillText('開放式辦公區', 300, 86);
     ctx.fillText('茶水間', 72, 422);
     ctx.fillText('會議室', 620, 382);
 }
@@ -732,9 +732,14 @@ function drawCharacter(ch, facing) {
         ctx.fillText('…', x + w + 5, y + 12);
     }
     if (ch.status === 'paused') {
-        ctx.fillStyle = '#ced4da';
-        ctx.font = 'bold 10px "Noto Sans HK", sans-serif';
-        ctx.fillText('Zz', x + w - 2, y);
+        ctx.fillStyle = '#f8f9fa';
+        ctx.fillRect(x + w + 2, y - 14, 22, 16);
+        ctx.strokeStyle = '#212529';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x + w + 2, y - 14, 22, 16);
+        ctx.fillStyle = '#495057';
+        ctx.font = 'bold 11px "Noto Sans HK", sans-serif';
+        ctx.fillText('Zz', x + w + 6, y - 2);
     }
     if (ch.status === 'error' && ch.animFrame) {
         ctx.fillStyle = '#ff6b6b';
@@ -818,16 +823,23 @@ function npcAt(x, y) {
     return null;
 }
 
+function normalizeKey(key) {
+    if (key === ' ') return ' ';
+    if (key.length === 1) return key.toLowerCase();
+    return key;
+}
+
 function bindInput() {
     window.addEventListener('keydown', function (e) {
         const typing = e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA');
-        if (keys.hasOwnProperty(e.key) && !typing) keys[e.key] = true;
+        const key = normalizeKey(e.key);
+        if (keys.hasOwnProperty(key) && !typing) keys[key] = true;
         if (e.key === 'Escape') {
             if (gameState === 'dialogue') closeInspector();
             return;
         }
         if (typing) return;
-        if ((e.key === ' ' || e.key === 'Enter') && gameState === 'playing' && nearbyNpc) {
+        if ((key === ' ' || e.key === 'Enter') && gameState === 'playing' && nearbyNpc) {
             e.preventDefault();
             openInspector(nearbyNpc);
         } else if (e.key >= '1' && e.key <= '9') {
@@ -840,7 +852,8 @@ function bindInput() {
     });
 
     window.addEventListener('keyup', function (e) {
-        if (keys.hasOwnProperty(e.key)) keys[e.key] = false;
+        const key = normalizeKey(e.key);
+        if (keys.hasOwnProperty(key)) keys[key] = false;
     });
 
     canvas.addEventListener('click', function (e) {
