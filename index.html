@@ -3,84 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI總管 · 員工辦公室</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23080c1a'/><rect x='18' y='18' width='64' height='64' fill='none' stroke='%2300e8ff' stroke-width='8'/><rect x='40' y='40' width='20' height='20' fill='%23ff2bd6'/></svg>">
+    <title>AI總管 :: WORKFORCE NODE</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23000000'/><text x='50' y='68' text-anchor='middle' font-size='64' font-family='monospace' fill='%2300ff41'>M</text></svg>">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="app">
-        <div id="game-container">
-            <canvas id="game-canvas" width="800" height="600"></canvas>
-            <div class="fx-vignette" aria-hidden="true"></div>
-            <div class="fx-scanlines" aria-hidden="true"></div>
-            <div class="fx-sweep" aria-hidden="true"></div>
+    <canvas id="matrix-rain" aria-hidden="true"></canvas>
+    <div class="scanlines" aria-hidden="true"></div>
 
-            <div id="interaction-hint">▼ 撳空白鍵查看</div>
-
-            <div id="dialogue-box" role="dialog" aria-modal="true" aria-labelledby="speaker-name">
-                <div class="inspector-head">
-                    <div class="speaker" id="speaker-name">員工</div>
-                    <button type="button" id="close-inspector" aria-label="關閉">X</button>
-                </div>
-                <dl class="inspector-meta" id="inspector-meta"></dl>
-                <div class="message" id="dialogue-text"></div>
-                <div class="inspector-events" id="inspector-events"></div>
-                <details class="mock-chat">
-                    <summary>可選模擬對話（靜態站唔會呼叫真實 LLM；Vercel／本機 API 若存在會先試）</summary>
-                    <div class="input-area">
-                        <input type="text" id="dialogue-input" placeholder="輸入一句（離線模擬）…" autocomplete="off">
-                        <button type="button" id="send-btn">傳送</button>
-                    </div>
-                </details>
-            </div>
-
-            <div class="dpad" aria-hidden="true">
-                <button type="button" class="n" data-dir="up">↑</button>
-                <button type="button" class="w" data-dir="left">←</button>
-                <button type="button" class="act" data-act="interact">●</button>
-                <button type="button" class="e" data-dir="right">→</button>
-                <button type="button" class="s" data-dir="down">↓</button>
-            </div>
-
-            <div id="loading">
-                <div class="boot-mark" aria-hidden="true"></div>
-                <h1>AI總管 · 員工辦公室</h1>
-                <p id="loading-msg">載入員工資料中…</p>
-            </div>
-        </div>
-
-        <aside id="hud-panel">
-            <div>
-                <div class="hud-kicker">樓層狀態 // NODE</div>
-                <h1 id="office-name">AI總管 · 員工辦公室</h1>
-                <p id="updated-at">讀取資料中…</p>
-                <div id="hint">
-                    <kbd>WASD</kbd> 移動　
-                    <kbd>空白鍵</kbd> 查看員工　
-                    <kbd>1-4</kbd> 快速揀人　
-                    <kbd>Esc</kbd> 關閉
-                </div>
-            </div>
-            <section class="hud-section">
-                <h2>員工名單</h2>
-                <div class="employee-list" id="employee-list"></div>
-            </section>
-            <section class="hud-section">
-                <h2>最近事件</h2>
-                <div class="event-feed" id="event-feed"></div>
-            </section>
-            <p class="hud-legend">
-                <span class="legend-dot idle"></span>閒置
-                <span class="legend-dot busy"></span>忙碌
-                <span class="legend-dot paused"></span>暫停
-                <span class="legend-dot offline"></span>離線
-                <span class="legend-dot error"></span>錯誤
-                <br>
-                資料來源：<code>data/office-data.json</code>（靜態，無需後端）
-            </p>
-        </aside>
+    <div id="boot-screen" role="status" aria-live="polite">
+        <pre class="boot-banner" aria-hidden="true">╔══════════════════════════════════════════╗
+║  AI總管 :: WORKFORCE NODE                ║
+║  MATRIX TERMINAL · COMMAND CENTER        ║
+╚══════════════════════════════════════════╝</pre>
+        <div id="boot-log" class="boot-log"></div>
+        <p id="boot-msg" class="boot-msg">正在載入公開快照…</p>
     </div>
 
-    <script src="game.js"></script>
+    <div id="app" hidden>
+        <header class="topbar">
+            <div class="topbar-ascii" aria-hidden="true">+-- SYS -------------------------+</div>
+            <div class="topbar-row">
+                <h1 id="sys-title">AI總管 :: WORKFORCE NODE</h1>
+                <div class="topbar-meta">
+                    <span class="chip chip-live" id="link-state">LINK/UP</span>
+                    <span class="chip" id="clock">--:--:--</span>
+                    <span class="chip" id="updated-at">SNAPSHOT/--</span>
+                </div>
+            </div>
+            <p class="topbar-sub">
+                <span id="office-name">AI總管 · 員工辦公室</span>
+                <span class="sep">//</span>
+                <span id="node-summary">NODES/--</span>
+                <span class="sep">//</span>
+                <span>SRC <code>data/office-data.json</code></span>
+            </p>
+        </header>
+
+        <main class="board">
+            <section class="panel" id="roster-panel" aria-labelledby="roster-title">
+                <div class="panel-title" id="roster-title">
+                    <span class="panel-tag">01</span>
+                    ROSTER / 員工名單
+                    <span class="panel-hint">[1-4] 揀人</span>
+                </div>
+                <div id="employee-list" class="employee-list" role="listbox" aria-label="員工名單"></div>
+            </section>
+
+            <section class="panel" id="inspector-panel" aria-labelledby="inspector-title">
+                <div class="panel-title" id="inspector-title">
+                    <span class="panel-tag">02</span>
+                    INSPECTOR / 檢查視窗
+                    <span class="panel-hint">[Esc] 關閉</span>
+                </div>
+                <div id="inspector-body" class="inspector-body">
+                    <pre class="idle-prompt">SELECT A NODE
+&gt; 喺名單撳一位員工，或者撳 1–4
+&gt; 顯示狀態、模型、今日 token、最後回覆</pre>
+                </div>
+            </section>
+
+            <section class="panel" id="budget-panel" aria-labelledby="budget-title">
+                <div class="panel-title" id="budget-title">
+                    <span class="panel-tag">03</span>
+                    TOKEN BUDGETS / 用量預算
+                </div>
+                <div id="budget-list" class="budget-list"></div>
+            </section>
+
+            <section class="panel" id="log-panel" aria-labelledby="log-title">
+                <div class="panel-title" id="log-title">
+                    <span class="panel-tag">04</span>
+                    EVENT LOG / 事件紀錄
+                    <span class="panel-hint">TAIL -F</span>
+                </div>
+                <div id="event-feed" class="event-feed" role="log" aria-live="polite"></div>
+            </section>
+        </main>
+
+        <footer class="statusbar">
+            <span>KEYS <kbd>1-4</kbd> 揀人 <kbd>↑↓</kbd> 巡覽 <kbd>Enter</kbd> 檢查 <kbd>Esc</kbd> 清除</span>
+            <span class="sep">//</span>
+            <span>STATUS <span class="legend idle">IDLE 閒置</span> <span class="legend busy">BUSY 忙碌</span> <span class="legend paused">PAUSED 暫停</span> <span class="legend offline">OFFLINE 離線</span> <span class="legend error">ERROR 錯誤</span></span>
+            <span class="sep">//</span>
+            <span>READ-ONLY SNAPSHOT · NO SECRETS</span>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
 </body>
 </html>

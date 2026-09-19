@@ -1,6 +1,6 @@
 /**
- * 蝦仔辦公室後端 API - WebSocket 版本
- * 連接 OpenClaw 同前端遊戲
+ * WORKFORCE NODE 可選後端 API（Vercel／本機）
+ * 連接 OpenClaw；純靜態 Pages 唔需要呢個檔
  */
 
 const express = require('express');
@@ -205,15 +205,15 @@ app.get("/", (req, res) => {
         let html = fs.readFileSync(indexPath, "utf8");
         const apiUrl = String(process.env.API_URL || "").replace(/["<>\\]/g, "");
         const scriptInjection = `<script>window.API_URL = "${apiUrl}";</script>`;
-        html = html.replace('<script src="game.js"></script>', scriptInjection + "\n    <script src=\"game.js\"></script>");
+        html = html.replace('<script src="app.js"></script>', scriptInjection + "\n    <script src=\"app.js\"></script>");
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
         res.send(html);
     } else {
         res.status(404).send("index.html not found");
     }
 });
-app.get('/game.js', (req, res) => {
-    sendPublicFile(res, 'game.js', 'application/javascript; charset=utf-8');
+app.get('/app.js', (req, res) => {
+    sendPublicFile(res, 'app.js', 'application/javascript; charset=utf-8');
 });
 app.get('/style.css', (req, res) => {
     sendPublicFile(res, 'style.css', 'text/css; charset=utf-8');
@@ -228,7 +228,7 @@ app.get('/data/README.md', (req, res) => {
 // 本地開發
 if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
     server.listen(PORT, () => {
-        log('INFO', `🎮 AI員工辦公室啟動於 http://localhost:${PORT}`);
+        log('INFO', `AI總管 :: WORKFORCE NODE 啟動於 http://localhost:${PORT}`);
         log('INFO', `🔌 WebSocket 已啟用`);
     });
 }

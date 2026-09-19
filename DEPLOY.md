@@ -1,6 +1,6 @@
 # 部署指南（GitHub Pages 為主）
 
-瀏覽辦公室 **唔需要後端**。優先用 GitHub Pages 派靜態檔。Vercel 只係可選（舊有 `/api/chat`）。
+瀏覽指揮中心 **唔需要後端**。優先用 GitHub Pages 派靜態檔。Vercel 只係可選（舊有 `/api/chat`）。
 
 ## 本機（靜態，同 Pages 一樣）
 
@@ -22,7 +22,7 @@ python3 -m http.server 4173
 `vercel.json` 會：
 
 - `/api/*` → `api/index.js`（舊 chat／health，OpenClaw 可選）
-- 前端 `index.html`、`game.js`、`style.css`、`data/office-data.json` 以靜態檔提供
+- 前端 `index.html`、`app.js`、`style.css`、`data/office-data.json` 以靜態檔提供
 
 純睇員工狀態唔會打 API。檢查器入面嘅可選對話若 API 唔在，會用離線模擬。
 
@@ -47,7 +47,7 @@ npm start
 ```
 ├── index.html
 ├── style.css
-├── game.js
+├── app.js
 ├── data/office-data.json
 ├── api/index.js
 └── vercel.json

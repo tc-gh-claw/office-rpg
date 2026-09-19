@@ -1,22 +1,31 @@
-# AI總管 · 員工辦公室
+# AI總管 :: WORKFORCE NODE
 
-像素辦公室，用嚟 **睇** AI 員工隊伍：邊個閒置／忙碌／暫停、最近事件、今日 token 用量對預算。
+Matrix 風格 **終端指揮中心**：綠黑畫面、等寬字、ASCII 邊框，用嚟睇 AI 員工隊伍——邊個閒置／忙碌／暫停／離線／錯誤、今日 token 對預算、最近事件、單一員工檢查視窗。
 
 畫面係 **純靜態網站**（HTML / CSS / JS），GitHub Pages 開到就得，**唔需要後端**。資料由 `data/office-data.json` 讀入。
 
-## 視覺：Style C · Neon Cyberpunk Office
+## 視覺：Style D · Matrix terminal command-center
 
-近黑底（`#080c1a`）、硬像素邊、青／洋紅／檸檬霓虹。閒置青色、忙碌洋紅／檸檬脈衝、暫停灰紫、錯誤熱粉、離線暗色。畫布同側欄 HUD 有掃描線同暗角（CSS overlay，唔會每幀 `ctx.filter`）。角色仍係 Dragon Quest 式像素人，但服裝、枱面、地板改成夜間賽博辦公室（暗磚、霓虹燈帶、電子銘牌、窗外夜景），唔再係暖木牧歌。
+近黑底（`#000` / `#050505`）、Matrix 綠（`#00ff41`）、直角、monospace、輕掃描線。背景係 Canvas **Matrix rain**（低對比，唔蓋過 HUD）。參考 [nocoo/matrix](https://github.com/nocoo/matrix) 嘅綠黑終端看板，**唔再**係 Dragon Quest 像素 RPG、牧場暖色辦公室、或者霓虹賽博像素枱。
 
-原本嗰個「蝦仔／claw」單人 NPC 辦公室已擴成 4 張枱：**AI總管**、**閃一**、**閃二**、**智一**。
+四個節點：**AI總管**、**閃一**、**閃二**、**智一**。暫停（例如智一）用虛線框、暗綠 `[PAUSED]`、`// HALT` 標示，同閒置／忙碌明顯分開。
 
-## 玩法
+## 畫面面板
 
-- **移動**：`WASD` 或方向鍵（手機用畫面右下角十字鍵）
-- **查看員工**：行近枱，撳 `空白鍵`／`Enter`；或喺側欄撳名單；或直接撳畫面上嘅人／枱
-- **快速揀人**：`1`–`4`
-- **關閉視窗**：`Esc` 或視窗右上 `X`
-- 對話檢查器顯示：狀態、模型、今日 token、最後回覆預覽、事件備註（全部嚟自 JSON，唔會現場 Call LLM）
+| 面板 | 內容 |
+|------|------|
+| ROSTER / 員工名單 | 狀態、模型、今日用量 ASCII bar |
+| INSPECTOR / 檢查視窗 | 揀中員工：最後回覆、模型、token、事件 |
+| TOKEN BUDGETS | 每日／每月用量對預算 |
+| EVENT LOG | 捲動終端 feed；撳一行會揀對應員工 |
+
+## 操作
+
+- **揀人**：撳名單；或 `1`–`4`；或 `↑` `↓` / `j` `k`
+- **檢查**：揀中後右側 inspector 即時更新
+- **事件**：撳 log 一行會跳去嗰位員工
+- **關閉選取**：`Esc`
+- inspector 入面可選「模擬對話」：靜態站唔會 Call 真 LLM；若 Vercel／本機 `/api/chat` 存在會先試
 
 ## 本機開啟
 
@@ -45,7 +54,7 @@ npm start
 
 ### 公開網址格式
 
-- 專案站：`https://<user-or-org>.github.io/<repo>/`
+- 專案站：`https://<user>.github.io/<repo>/`
 - 例如本 repo：`https://tc-gh-claw.github.io/office-rpg/`
 - 若 repo 名係 `<user>.github.io`：`https://<user>.github.io/`
 
@@ -71,15 +80,15 @@ data/office-data.json
 
 ## Vercel（可選，唔影響 Pages）
 
-如果已經接咗 Vercel：前端靜態檔照常睇辦公室；`/api/chat` 仍然可用（檢查器入面「可選模擬對話」會先試 API，失敗就用離線模擬）。**純瀏覽唔需要 API。**
+如果已經接咗 Vercel：前端靜態檔照常睇指揮中心；`/api/chat` 仍然可用（inspector 入面「可選模擬對話」會先試 API，失敗就用離線模擬）。**純瀏覽唔需要 API。**
 
 ## 檔案結構
 
 ```
 office-rpg/
-├── index.html              # 畫面 + 側欄 HUD
-├── style.css               # Neon Cyberpunk 主題 token / HUD
-├── game.js                 # 地圖、角色、檢查器、HUD
+├── index.html              # Matrix 終端殼
+├── style.css               # 綠黑主題 token / HUD
+├── app.js                  # 載入 JSON、名單、預算、log、inspector
 ├── data/office-data.json   # 公開員工快照（請定期覆蓋）
 ├── data/README.md          # 資料格式同更新方法
 ├── api/index.js            # Vercel／本機可選 API（唔係 Pages 必需）
@@ -87,15 +96,15 @@ office-rpg/
 └── README.md
 ```
 
-## 狀態顏色
+## 狀態
 
 | 狀態 | 意思 |
 |------|------|
-| 閒置 idle | 青色霓虹，輕微擺動 |
-| 忙碌 busy | 洋紅／檸檬脈衝，打字／省略號 |
-| 暫停 paused | 灰紫，Zz |
-| 離線 offline | 暗色 |
-| 錯誤 error | 熱粉紅閃爍 |
+| 閒置 idle | 亮綠 `[IDLE]` |
+| 忙碌 busy | 亮綠閃爍 `[BUSY]` |
+| 暫停 paused | 暗綠虛線框 `[PAUSED]` + HALT |
+| 離線 offline | 更暗 `[OFFLINE]` |
+| 錯誤 error | 紅 `[ERROR]` 閃爍 |
 
 ---
 
