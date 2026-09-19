@@ -1,11 +1,12 @@
 {
   "name": "office-rpg-game",
   "version": "1.0.0",
-  "description": "蝦仔辦公室 - Dragon Quest 風格 RPG",
+  "description": "AI總管 · 員工辦公室（GitHub Pages 靜態視覺化）",
   "main": "api/index.js",
   "scripts": {
     "start": "node api/index.js",
-    "dev": "node api/index.js"
+    "dev": "node api/index.js",
+    "static": "python3 -m http.server 4173"
   },
   "dependencies": {
     "cors": "^2.8.6",

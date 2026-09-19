@@ -1,0 +1,205 @@
+{
+  "office_name": "AI總管 · 員工辦公室",
+  "updated_at": "2026-09-19T21:04:05+08:00",
+  "manager": {
+    "id": "ai-manager",
+    "display_name": "AI總管",
+    "role": "dispatcher"
+  },
+  "employees": [
+    {
+      "id": "gemini-a",
+      "display_name": "閃一",
+      "provider": "google",
+      "model": "gemini-flash-latest",
+      "specialty": [
+        "general",
+        "long_context",
+        "multimodal"
+      ],
+      "status": "idle",
+      "desk": {
+        "x": 2,
+        "y": 2
+      },
+      "role_title": "總管下屬 · Flash 員工"
+    },
+    {
+      "id": "gemini-b",
+      "display_name": "閃二",
+      "provider": "google",
+      "model": "gemini-flash-latest",
+      "specialty": [
+        "general",
+        "long_context",
+        "failover"
+      ],
+      "status": "idle",
+      "desk": {
+        "x": 6,
+        "y": 2
+      },
+      "role_title": "總管下屬 · Flash 員工"
+    },
+    {
+      "id": "chatgpt-a",
+      "display_name": "智一",
+      "provider": "openai",
+      "model": "o3",
+      "specialty": [
+        "reasoning",
+        "code",
+        "planning"
+      ],
+      "status": "paused",
+      "desk": {
+        "x": 4,
+        "y": 5
+      },
+      "role_title": "暫停 · ChatGPT"
+    }
+  ],
+  "budgets": {
+    "warn_at_pct": 80,
+    "hard_stop_at_pct": 100,
+    "failover_order": [
+      "gemini-a",
+      "gemini-b"
+    ],
+    "per_employee": {
+      "gemini-a": {
+        "daily_limit": 500000,
+        "monthly_limit": 10000000
+      },
+      "gemini-b": {
+        "daily_limit": 500000,
+        "monthly_limit": 10000000
+      },
+      "chatgpt-a": {
+        "daily_limit": 300000,
+        "monthly_limit": 6000000
+      }
+    }
+  },
+  "usage": {
+    "gemini-a": {
+      "today": "2026-09-19",
+      "day_input": 22,
+      "day_output": 3,
+      "month": "2026-09",
+      "month_input": 22,
+      "month_output": 3,
+      "lifetime_input": 22,
+      "lifetime_output": 3,
+      "call_count": 4
+    },
+    "gemini-b": {
+      "today": "2026-09-19",
+      "day_input": 16,
+      "day_output": 1,
+      "month": "2026-09",
+      "month_input": 16,
+      "month_output": 1,
+      "lifetime_input": 16,
+      "lifetime_output": 1,
+      "call_count": 3
+    },
+    "chatgpt-a": {
+      "today": "2026-09-19",
+      "day_input": 0,
+      "day_output": 0,
+      "month": "2026-09",
+      "month_input": 0,
+      "month_output": 0,
+      "lifetime_input": 0,
+      "lifetime_output": 0,
+      "call_count": 0
+    }
+  },
+  "events": [
+    {
+      "ts": "2026-09-19T20:02:36+08:00",
+      "employee_id": "gemini-a",
+      "kind": "smoke_test",
+      "ok": false,
+      "text": "HTTP 404",
+      "model": null,
+      "input_tokens": 0,
+      "output_tokens": 0
+    },
+    {
+      "ts": "2026-09-19T20:02:47+08:00",
+      "employee_id": "gemini-a",
+      "kind": "smoke_test",
+      "ok": false,
+      "text": "HTTP 429",
+      "model": "gemini-3.1-pro-preview",
+      "input_tokens": 0,
+      "output_tokens": 0
+    },
+    {
+      "ts": "2026-09-19T20:03:06+08:00",
+      "employee_id": "gemini-b",
+      "kind": "smoke_test",
+      "ok": false,
+      "text": "HTTP 403",
+      "model": "gemini-pro-latest",
+      "input_tokens": 0,
+      "output_tokens": 0
+    },
+    {
+      "ts": "2026-09-19T20:03:06+08:00",
+      "employee_id": "gemini-b",
+      "kind": "smoke_test",
+      "ok": false,
+      "text": "HTTP 403",
+      "model": "gemini-3.1-pro-preview",
+      "input_tokens": 0,
+      "output_tokens": 0
+    },
+    {
+      "ts": "2026-09-19T20:03:06+08:00",
+      "employee_id": "gemini-a",
+      "kind": "smoke_test",
+      "ok": true,
+      "text": "OK",
+      "model": "gemini-flash-latest",
+      "input_tokens": 6,
+      "output_tokens": 1
+    },
+    {
+      "ts": "2026-09-19T20:06:11+08:00",
+      "employee_id": "gemini-a",
+      "kind": "connectivity_test",
+      "ok": true,
+      "text": "我是由",
+      "model": "gemini-flash-latest",
+      "input_tokens": 16,
+      "output_tokens": 2
+    },
+    {
+      "ts": "2026-09-19T20:06:11+08:00",
+      "employee_id": "gemini-b",
+      "kind": "connectivity_test",
+      "ok": true,
+      "text": "我是",
+      "model": "gemini-flash-latest",
+      "input_tokens": 16,
+      "output_tokens": 1
+    }
+  ],
+  "rooms": [
+    {
+      "id": "floor",
+      "name": "開放式辦公區",
+      "w": 12,
+      "h": 8
+    },
+    {
+      "id": "war-room",
+      "name": "派工室",
+      "w": 6,
+      "h": 4
+    }
+  ]
+}

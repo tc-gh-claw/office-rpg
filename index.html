@@ -1,298 +1,84 @@
 <!DOCTYPE html>
-<html lang="zh-HK">
+<html lang="zh-Hant-HK">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>蝦仔辦公室 - Dragon Quest V 風格</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+TC:wght@400;700&display=swap');
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            image-rendering: pixelated;
-            image-rendering: -moz-crisp-edges;
-            image-rendering: crisp-edges;
-        }
-        
-        body {
-            font-family: 'Noto Sans TC', sans-serif;
-            background: #0d1b2a;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            overflow: hidden;
-        }
-        
-        #game-container {
-            position: relative;
-            width: 800px;
-            height: 600px;
-            background: #1b263b;
-            border: 8px solid #415a77;
-            box-shadow: 
-                0 0 0 4px #778da9,
-                0 0 20px rgba(0,0,0,0.8),
-                inset 0 0 100px rgba(0,0,0,0.3);
-        }
-        
-        #game-canvas {
-            display: block;
-            background: #2d3a4a;
-        }
-        
-        /* Dragon Quest 風格對話框 */
-        #dialogue-box {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
-            background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
-            border: 4px solid #212529;
-            border-radius: 0;
-            padding: 20px;
-            display: none;
-            box-shadow: 
-                inset 0 0 0 2px #6c757d,
-                inset 0 0 0 4px #adb5bd,
-                4px 4px 0 #212529;
-        }
-        
-        #dialogue-box.active {
-            display: block;
-            animation: slideUp 0.2s ease-out;
-        }
-        
-        @keyframes slideUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        
-        #dialogue-box .speaker {
-            color: #212529;
-            font-weight: bold;
-            font-size: 14px;
-            margin-bottom: 10px;
-            padding: 4px 12px;
-            background: #ffd43b;
-            border: 2px solid #212529;
-            display: inline-block;
-            box-shadow: 2px 2px 0 #212529;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 10px;
-        }
-        
-        #dialogue-box .message {
-            color: #212529;
-            font-size: 16px;
-            line-height: 1.8;
-            min-height: 60px;
-            padding: 10px;
-            background: rgba(255,255,255,0.5);
-            border: 2px dashed #adb5bd;
-        }
-        
-        #dialogue-box .input-area {
-            margin-top: 15px;
-            display: flex;
-            gap: 10px;
-        }
-        
-        #dialogue-input {
-            flex: 1;
-            background: #fff;
-            border: 3px solid #212529;
-            padding: 12px;
-            color: #212529;
-            font-size: 14px;
-            font-family: inherit;
-            box-shadow: inset 2px 2px 0 #adb5bd;
-        }
-        
-        #dialogue-input:focus {
-            outline: none;
-            border-color: #339af0;
-        }
-        
-        #send-btn {
-            background: linear-gradient(180deg, #51cf66 0%, #37b24d 100%);
-            border: 3px solid #212529;
-            padding: 12px 24px;
-            color: #fff;
-            font-weight: bold;
-            cursor: pointer;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 10px;
-            text-shadow: 1px 1px 0 #212529;
-            box-shadow: 3px 3px 0 #212529;
-            transition: all 0.1s;
-        }
-        
-        #send-btn:hover {
-            background: linear-gradient(180deg, #69db7c 0%, #51cf66 100%);
-        }
-        
-        #send-btn:active {
-            transform: translate(2px, 2px);
-            box-shadow: 1px 1px 0 #212529;
-        }
-        
-        /* 提示文字 - DQ 風格 */
-        #hint {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            color: #fff;
-            font-size: 11px;
-            font-family: 'Press Start 2P', cursive;
-            text-shadow: 2px 2px 0 #212529;
-            background: rgba(0,0,0,0.7);
-            padding: 10px 15px;
-            border: 2px solid #fff;
-            box-shadow: 3px 3px 0 #212529;
-        }
-        
-        #hint kbd {
-            background: #ffd43b;
-            color: #212529;
-            padding: 2px 6px;
-            border: 2px solid #212529;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 8px;
-        }
-        
-        /* 互動提示 - DQ 風格箭咀 */
-        #interaction-hint {
-            position: absolute;
-            display: none;
-            background: #ff6b6b;
-            color: #fff;
-            padding: 6px 12px;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 8px;
-            border: 3px solid #212529;
-            box-shadow: 2px 2px 0 #212529;
-            animation: bounce 0.6s infinite alternate;
-        }
-        
-        @keyframes bounce {
-            from { transform: translateY(0); }
-            to { transform: translateY(-8px); }
-        }
-        
-        /* 載入畫面 - DQ 風格 */
-        #loading {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(180deg, #0d1b2a 0%, #1b263b 100%);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: #fff;
-            z-index: 100;
-        }
-        
-        #loading h1 {
-            font-size: 24px;
-            color: #ffd43b;
-            font-family: 'Press Start 2P', cursive;
-            text-shadow: 
-                3px 3px 0 #212529,
-                -1px -1px 0 #212529,
-                1px -1px 0 #212529,
-                -1px 1px 0 #212529;
-            margin-bottom: 30px;
-            animation: pulse 1.5s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-        
-        #loading .dragon {
-            font-size: 48px;
-            margin-bottom: 20px;
-            animation: float 2s infinite ease-in-out;
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-        
-        #loading p {
-            font-size: 10px;
-            font-family: 'Press Start 2P', cursive;
-            color: #adb5bd;
-        }
-        
-        /* 回應區域 */
-        #response-area {
-            max-height: 80px;
-            overflow-y: auto;
-            margin-top: 10px;
-            padding: 8px;
-            background: rgba(0,0,0,0.05);
-            border: 2px solid #adb5bd;
-            font-size: 12px;
-        }
-        
-        #response-area .user-msg {
-            color: #339af0;
-            margin-bottom: 4px;
-        }
-        
-        #response-area .claw-msg {
-            color: #51cf66;
-            margin-bottom: 4px;
-        }
-        
-        /* 打字機效果游標 */
-        .typing-cursor::after {
-            content: '▋';
-            animation: blink 1s infinite;
-        }
-        
-        @keyframes blink {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0; }
-        }
-    </style>
+    <title>AI總管 · 員工辦公室</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐉</text></svg>">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="game-container">
-        <canvas id="game-canvas" width="800" height="600"></canvas>
-        
-        <div id="hint">
-            <kbd>WASD</kbd> 移動 | <kbd>SPACE</kbd> 對話
-        </div>
-        
-        <div id="interaction-hint">▼ 按 SPACE</div>
-        
-        <div id="dialogue-box">
-            <div class="speaker">❤️‍🔥 蝦仔</div>
-            <div class="message" id="dialogue-text"></div>
-            <div id="response-area"></div>
-            <div class="input-area">
-                <input type="text" id="dialogue-input" placeholder="輸入指令..." autocomplete="off">
-                <button id="send-btn">傳送</button>
+    <div id="app">
+        <div id="game-container">
+            <canvas id="game-canvas" width="800" height="600"></canvas>
+
+            <div id="hint">
+                <kbd>WASD</kbd> 移動　
+                <kbd>空白鍵</kbd> 查看員工　
+                <kbd>1-4</kbd> 快速揀人　
+                <kbd>Esc</kbd> 關閉
+            </div>
+
+            <div id="interaction-hint">▼ 撳空白鍵查看</div>
+
+            <div id="dialogue-box" role="dialog" aria-modal="true" aria-labelledby="speaker-name">
+                <div class="inspector-head">
+                    <div class="speaker" id="speaker-name">員工</div>
+                    <button type="button" id="close-inspector" aria-label="關閉">X</button>
+                </div>
+                <dl class="inspector-meta" id="inspector-meta"></dl>
+                <div class="message" id="dialogue-text"></div>
+                <div class="inspector-events" id="inspector-events"></div>
+                <details class="mock-chat">
+                    <summary>可選模擬對話（靜態站唔會呼叫真實 LLM；Vercel／本機 API 若存在會先試）</summary>
+                    <div class="input-area">
+                        <input type="text" id="dialogue-input" placeholder="輸入一句（離線模擬）…" autocomplete="off">
+                        <button type="button" id="send-btn">傳送</button>
+                    </div>
+                </details>
+            </div>
+
+            <div class="dpad" aria-hidden="true">
+                <button type="button" class="n" data-dir="up">↑</button>
+                <button type="button" class="w" data-dir="left">←</button>
+                <button type="button" class="act" data-act="interact">●</button>
+                <button type="button" class="e" data-dir="right">→</button>
+                <button type="button" class="s" data-dir="down">↓</button>
+            </div>
+
+            <div id="loading">
+                <div class="dragon">🐉</div>
+                <h1>AI總管 · 員工辦公室</h1>
+                <p id="loading-msg">載入員工資料中…</p>
             </div>
         </div>
-        
-        <div id="loading">
-            <div class="dragon">🐉</div>
-            <h1>蝦仔辦公室</h1>
-            <p>NOW LOADING...</p>
-        </div>
+
+        <aside id="hud-panel">
+            <div>
+                <div class="hud-kicker">OFFICE STATUS</div>
+                <h1 id="office-name">AI總管 · 員工辦公室</h1>
+                <p id="updated-at">讀取資料中…</p>
+            </div>
+            <section class="hud-section">
+                <h2>員工名單</h2>
+                <div class="employee-list" id="employee-list"></div>
+            </section>
+            <section class="hud-section">
+                <h2>最近事件</h2>
+                <div class="event-feed" id="event-feed"></div>
+            </section>
+            <p class="hud-legend">
+                <span class="legend-dot" style="background:#51cf66"></span>閒置
+                <span class="legend-dot" style="background:#ffd43b"></span>忙碌
+                <span class="legend-dot" style="background:#adb5bd"></span>暫停
+                <span class="legend-dot" style="background:#495057"></span>離線
+                <span class="legend-dot" style="background:#ff6b6b"></span>錯誤
+                <br>
+                資料來源：<code>data/office-data.json</code>（靜態，無需後端）
+            </p>
+        </aside>
     </div>
-    
+
     <script src="game.js"></script>
 </body>
 </html>

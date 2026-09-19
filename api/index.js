@@ -180,33 +180,55 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// 靜態檔案 - 主頁（注入 API_URL）
+const STATIC_ROOT = path.join(__dirname, '..');
+
+function sendPublicFile(res, relPath, contentType) {
+    const abs = path.normalize(path.join(STATIC_ROOT, relPath));
+    const root = STATIC_ROOT.endsWith(path.sep) ? STATIC_ROOT : STATIC_ROOT + path.sep;
+    if (abs !== STATIC_ROOT && !abs.startsWith(root)) {
+        return res.status(403).send('Forbidden');
+    }
+    if (!fs.existsSync(abs)) {
+        return res.status(404).send('Not found');
+    }
+    res.setHeader('Content-Type', contentType);
+    if (relPath.endsWith('.json')) {
+        res.setHeader('Cache-Control', 'no-store, must-revalidate');
+    }
+    res.sendFile(abs);
+}
+
+// 靜態檔案 - 主頁（注入 API_URL；Pages 唔經呢條路）
 app.get("/", (req, res) => {
-    const indexPath = path.join(__dirname, "../index.html");
+    const indexPath = path.join(STATIC_ROOT, "index.html");
     if (fs.existsSync(indexPath)) {
         let html = fs.readFileSync(indexPath, "utf8");
-        const apiUrl = process.env.API_URL || "";
+        const apiUrl = String(process.env.API_URL || "").replace(/["<>\\]/g, "");
         const scriptInjection = `<script>window.API_URL = "${apiUrl}";</script>`;
         html = html.replace('<script src="game.js"></script>', scriptInjection + "\n    <script src=\"game.js\"></script>");
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
         res.send(html);
     } else {
         res.status(404).send("index.html not found");
     }
 });
 app.get('/game.js', (req, res) => {
-    const jsPath = path.join(__dirname, '../game.js');
-    if (fs.existsSync(jsPath)) {
-        res.setHeader('Content-Type', 'application/javascript');
-        res.sendFile(jsPath);
-    } else {
-        res.status(404).send('game.js not found');
-    }
+    sendPublicFile(res, 'game.js', 'application/javascript; charset=utf-8');
+});
+app.get('/style.css', (req, res) => {
+    sendPublicFile(res, 'style.css', 'text/css; charset=utf-8');
+});
+app.get('/data/office-data.json', (req, res) => {
+    sendPublicFile(res, 'data/office-data.json', 'application/json; charset=utf-8');
+});
+app.get('/data/README.md', (req, res) => {
+    sendPublicFile(res, 'data/README.md', 'text/markdown; charset=utf-8');
 });
 
 // 本地開發
 if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
     server.listen(PORT, () => {
-        log('INFO', `🎮 蝦仔辦公室後端啟動於 http://localhost:${PORT}`);
+        log('INFO', `🎮 AI員工辦公室啟動於 http://localhost:${PORT}`);
         log('INFO', `🔌 WebSocket 已啟用`);
     });
 }
